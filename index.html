@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MateChat</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 900px;
+      margin: auto;
+      background: #1f2937;
+    }
+
+    /* LOGIN */
+
+    #loginScreen {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      background: #374151;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    .login-box h1 {
+      margin-top: 0;
+      font-size: 34px;
+    }
+
+    .login-box p {
+      color: #d1d5db;
+    }
+
+    input,
+    button {
+      font-family: inherit;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      margin: 8px 0;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .main-button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #3b82f6;
+      color: white;
+      font-size: 17px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .main-button:hover {
+      background: #2563eb;
+    }
+
+    #error {
+      color: #fca5a5;
+      margin-top: 10px;
+    }
+
+    /* CHAT */
+
+    #chatScreen {
+      display: none;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    .header {
+      height: 70px;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid #374151;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .room {
+      color: #9ca3af;
+      font-size: 12px;
+    }
+
+    .online {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #86efac;
+      font-size: 13px;
+    }
+
+    .online-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 10px 13px;
+      border-radius: 15px;
+      word-wrap: break-word;
+    }
+
+    .message.mine {
+      align-self: flex-end;
+      background: #2563eb;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.theirs {
+      align-self: flex-start;
+      background: #374151;
+      border-bottom-left-radius: 4px;
+    }
+
+    .sender {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-bottom: 3px;
+    }
+
+    .message-text {
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .message-info {
+      font-size: 10px;
+      opacity: 0.65;
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    .composer {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      background: #111827;
+      border-top: 1px solid #374151;
+    }
+
+    .composer input {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 20px;
+      background: #374151;
+      color: white;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .send-button {
+      width: 50px;
+      border: none;
+      border-radius: 50%;
+      background: #3b82f6;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .send-button:hover {
+      background: #2563eb;
+    }
+
+    .empty {
+      text-align: center;
+      color: #9ca3af;
+      margin: auto;
+    }
+
+    @media (max-width: 600px) {
+      .message {
+        max-width: 85%;
+      }
+
+      .header {
+        height: 62px;
+      }
+
+      .messages {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOGIN SCREEN -->
+
+  <div id="loginScreen">
+
+    <div class="login-box">
+
+      <h1>💬 MateChat</h1>
+
+      <p>Enter your name and your private room code.</p>
+
+      <input
+        id="nameInput"
+        type="text"
+        maxlength="20"
+        placeholder="Your name"
+      >
+
+      <input
+        id="roomInput"
+        type="text"
+        maxlength="30"
+        placeholder="Room code"
+      >
+
+      <button class="main-button" onclick="enterChat()">
+        Enter Chat
+      </button>
+
+      <div id="error"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- CHAT SCREEN -->
+
+  <div id="chatScreen">
+
+    <div class="header">
+
+      <div class="header-left">
+
+        <div class="logo">
+          💬 MateChat
+        </div>
+
+        <div class="room" id="roomDisplay"></div>
+
+      </div>
+
+      <div class="online">
+        <div class="online-dot"></div>
+        <span id="onlineText">Connecting...</span>
+      </div>
+
+    </div>
+
+
+    <div class="messages" id="messages">
+
+      <div class="empty" id="emptyMessage">
+        No messages yet.<br>
+        Send the first message!
+      </div>
+
+    </div>
+
+
+    <div class="composer">
+
+      <input
+        id="messageInput"
+        type="text"
+        maxlength="1000"
+        placeholder="Type a message..."
+        autocomplete="off"
+      >
+
+      <button class="send-button" onclick="sendMessage()">
+        ➤
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- FIREBASE -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+
+  <script>
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCvx9Oo3xZxkyfGZ-Hm5Xj5os56fVoEX2o",
+      authDomain: "peggy-chat-4c0e3.firebaseapp.com",
+      projectId: "peggy-chat-4c0e3",
+      storageBucket: "peggy-chat-4c0e3.firebasestorage.app",
+      messagingSenderId: "126560387796",
+      appId: "1:126560387796:web:aafabb5ad5d44efec4b141",
+      measurementId: "G-94E71PCH6J"
+    };
+
+
+    firebase.initializeApp(firebaseConfig);
+
+
+    const auth = firebase.auth();
+
+    const db = firebase.firestore();
+
+
+    let currentUser = null;
+    let username = "";
+    let roomCode = "";
+    let unsubscribeMessages = null;
+
+
+    /*
+      SIGN IN ANONYMOUSLY
+    */
+
+    auth.signInAnonymously()
+      .then((result) => {
+
+        currentUser = result.user;
+
+        console.log("Signed in:", currentUser.uid);
+
+      })
+      .catch((error) => {
+
+        console.error(error);
+
+        document.getElementById("error").textContent =
+          "Firebase sign-in failed: " + error.message;
+
+      });
+
+
+    /*
+      ENTER CHAT
+    */
+
+    function enterChat() {
+
+      const name =
+        document.getElementById("nameInput").value.trim();
+
+      const room =
+        document.getElementById("roomInput").value.trim();
+
+
+      if (!name) {
+
+        document.getElementById("error").textContent =
+          "Please enter your name.";
+
+        return;
+      }
+
+
+      if (!room) {
+
+        document.getElementById("error").textContent =
+          "Please enter a room code.";
+
+        return;
+      }
+
+
+      if (!currentUser) {
+
+        document.getElementById("error").textContent =
+          "Still connecting to Firebase. Try again in a second.";
+
+        return;
+      }
+
+
+      username = name;
+
+      roomCode = room;
+
+
+      document.getElementById("loginScreen").style.display =
+        "none";
+
+      document.getElementById("chatScreen").style.display =
+        "flex";
+
+
+      document.getElementById("roomDisplay").textContent =
+        "Room: " + roomCode;
+
+
+      listenForMessages();
+
+      updatePresence();
+
+      setInterval(updatePresence, 20000);
+
+    }
+
+
+    /*
+      SEND MESSAGE
+    */
+
+    async function sendMessage() {
+
+      const input =
+        document.getElementById("messageInput");
+
+      const text =
+        input.value.trim();
+
+
+      if (!text) return;
+
+      if (!currentUser) return;
+
+
+      input.value = "";
+
+
+      try {
+
+        await db.collection("messages").add({
+
+          room: roomCode,
+
+          text: text,
+
+          sender: currentUser.uid,
+
+          senderName: username,
+
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+
+          readBy: {
+            [currentUser.uid]: true
+          }
+
+        });
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert("Message could not be sent.");
+
+      }
+
+    }
+
+
+    /*
+      ENTER KEY SENDS MESSAGE
+    */
+
+    document.getElementById("messageInput")
+      .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+
+          event.preventDefault();
+
+          sendMessage();
+
+        }
+
+      });
+
+
+    /*
+      LISTEN FOR MESSAGES
+    */
+
+    function listenForMessages() {
+
+      if (unsubscribeMessages) {
+
+        unsubscribeMessages();
+
+      }
+
+
+      unsubscribeMessages =
+        db.collection("messages")
+          .where("room", "==", roomCode)
+          .orderBy("timestamp", "asc")
+          .onSnapshot(
+
+            (snapshot) => {
+
+              const container =
+                document.getElementById("messages");
+
+
+              container.innerHTML = "";
+
+
+              if (snapshot.empty) {
+
+                container.innerHTML = `
+                  <div class="empty">
+                    No messages yet.<br>
+                    Send the first message!
+                  </div>
+                `;
+
+                return;
+
+              }
+
+
+              snapshot.forEach(async (doc) => {
+
+                const message = doc.data();
+
+                const isMine =
+                  message.sender === currentUser.uid;
+
+
+                const div =
+                  document.createElement("div");
+
+
+                div.className =
+                  "message " +
+                  (isMine ? "mine" : "theirs");
+
+
+                const time =
+                  message.timestamp
+                    ? message.timestamp.toDate()
+                    : new Date();
+
+
+                const timeText =
+                  time.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  });
+
+
+                let readText = "";
+
+
+                if (isMine) {
+
+                  const readBy =
+                    message.readBy || {};
+
+                  const someoneRead =
+                    Object.keys(readBy).some(
+                      uid => uid !== currentUser.uid && readBy[uid]
+                    );
+
+
+                  readText =
+                    someoneRead ? "✓✓ Read" : "✓ Sent";
+
+                }
+
+
+                div.innerHTML = `
+
+                  <div class="sender">
+                    ${escapeHTML(message.senderName || "Unknown")}
+                  </div>
+
+                  <div class="message-text">
+                    ${escapeHTML(message.text)}
+                  </div>
+
+                  <div class="message-info">
+
+                    ${timeText}
+
+                    ${isMine ? " • " + readText : ""}
+
+                  </div>
+
+                `;
+
+
+                container.appendChild(div);
+
+
+                /*
+                  Mark other people's messages as read
+                */
+
+                if (!isMine) {
+
+                  const readBy =
+                    message.readBy || {};
+
+
+                  if (!readBy[currentUser.uid]) {
+
+                    try {
+
+                      await db.collection("messages")
+                        .doc(doc.id)
+                        .update({
+
+                          [`readBy.${currentUser.uid}`]: true
+
+                        });
+
+                    } catch (error) {
+
+                      console.log("Read receipt error:", error);
+
+                    }
+
+                  }
+
+                }
+
+              });
+
+
+              container.scrollTop =
+                container.scrollHeight;
+
+            },
+
+            (error) => {
+
+              console.error(error);
+
+              document.getElementById("messages").innerHTML =
+                `<div class="empty">
+                  Could not load messages.<br><br>
+                  ${escapeHTML(error.message)}
+                </div>`;
+
+            }
+
+          );
+
+    }
+
+
+    /*
+      ONLINE PRESENCE
+    */
+
+    async function updatePresence() {
+
+      if (!currentUser || !roomCode) return;
+
+
+      try {
+
+        await db.collection("presence")
+          .doc(currentUser.uid)
+          .set({
+
+            username: username,
+
+            room: roomCode,
+
+            lastSeen:
+              firebase.firestore.FieldValue.serverTimestamp()
+
+          });
+
+        document.getElementById("onlineText").textContent =
+          "Online";
+
+      } catch (error) {
+
+        console.log("Presence error:", error);
+
+      }
+
+    }
+
+
+    /*
+      BASIC HTML SECURITY
+    */
+
+    function escapeHTML(text) {
+
+      return String(text)
+
+        .replace(/&/g, "&amp;")
+
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
+
+    }
+
+  </script>
+
+</body>
+</html>
