@@ -228,19 +228,41 @@
       margin: auto;
     }
 
-    @media (max-width: 600px) {
-      .message {
-        max-width: 85%;
-      }
+   @media (max-width: 600px) {
+  body {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
 
-      .header {
-        height: 62px;
-      }
+  #chatScreen {
+    height: 100dvh;
+    min-height: 0;
+  }
 
-      .messages {
-        padding: 12px;
-      }
-    }
+  .header {
+    height: 62px;
+    flex-shrink: 0;
+  }
+
+  .messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  .composer {
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    padding: 10px;
+  }
+
+  .message {
+    max-width: 85%;
+  }
+}
   </style>
 </head>
 
