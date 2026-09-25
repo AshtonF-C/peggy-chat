@@ -185,6 +185,25 @@
       margin-top: 4px;
     }
 
+    /* PHOTO MESSAGES */
+
+    .message-image {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .photo-loading {
+      padding: 10px;
+      color: #d1d5db;
+      font-size: 14px;
+    }
+
     /* COMPOSER */
 
     .composer {
@@ -196,7 +215,7 @@
       border-top: 1px solid #374151;
     }
 
-    .composer input {
+    .composer input[type="text"] {
       flex: 1;
       min-width: 0;
       padding: 13px;
@@ -208,11 +227,12 @@
       font-size: 16px;
     }
 
-    .composer input::placeholder {
+    .composer input[type="text"]::placeholder {
       color: #9ca3af;
     }
 
-    .emoji-button {
+    .emoji-button,
+    .photo-button {
       width: 48px;
       height: 48px;
       flex-shrink: 0;
@@ -224,8 +244,14 @@
       cursor: pointer;
     }
 
-    .emoji-button:hover {
+    .emoji-button:hover,
+    .photo-button:hover {
       background: #4b5563;
+    }
+
+    .photo-button.uploading {
+      opacity: 0.5;
+      pointer-events: none;
     }
 
     .send-button {
@@ -249,7 +275,7 @@
     .emoji-picker {
       display: none;
       position: absolute;
-      right: 65px;
+      right: 115px;
       bottom: 70px;
       width: 300px;
       max-height: 280px;
@@ -299,6 +325,25 @@
       margin: auto;
     }
 
+    /* UPLOAD STATUS */
+
+    .upload-status {
+      display: none;
+      position: absolute;
+      left: 12px;
+      bottom: 70px;
+      background: #1f2937;
+      border: 1px solid #4b5563;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      z-index: 150;
+    }
+
+    .upload-status.show {
+      display: block;
+    }
+
     @media (max-width: 600px) {
 
       body {
@@ -333,6 +378,11 @@
 
       .message {
         max-width: 85%;
+      }
+
+      .message-image {
+        max-width: 250px;
+        max-height: 350px;
       }
 
       .emoji-picker {
@@ -423,17 +473,57 @@
 
     <div class="composer">
 
+      <!-- UPLOAD STATUS -->
+
+      <div
+        class="upload-status"
+        id="uploadStatus"
+      >
+        Uploading photo...
+      </div>
+
+
       <!-- EMOJI PICKER -->
 
-      <div class="emoji-picker" id="emojiPicker">
+      <div
+        class="emoji-picker"
+        id="emojiPicker"
+      >
 
         <div class="emoji-title">
           Choose an emoji
         </div>
 
-        <div class="emoji-grid" id="emojiGrid"></div>
+        <div
+          class="emoji-grid"
+          id="emojiGrid"
+        ></div>
 
       </div>
+
+
+      <!-- PHOTO FILE INPUT -->
+
+      <input
+        id="photoInput"
+        type="file"
+        accept="image/*"
+        style="display:none"
+        onchange="handlePhotoSelected(event)"
+      >
+
+
+      <!-- PHOTO BUTTON -->
+
+      <button
+        class="photo-button"
+        id="photoButton"
+        type="button"
+        onclick="openPhotoPicker()"
+        title="Send a photo"
+      >
+        📷
+      </button>
 
 
       <!-- EMOJI BUTTON -->
@@ -515,6 +605,17 @@
 
     const notificationServer =
       "https://peggy-chat.vercel.app/api/notify";
+
+
+    /*
+      CLOUDINARY
+    */
+
+    const cloudinaryCloudName =
+      "x7safyic";
+
+    const cloudinaryUploadPreset =
+      "matechat";
 
 
     let currentUser = null;
@@ -614,7 +715,7 @@
 
 
     /*
-      INSERT EMOJI INTO MESSAGE BOX
+      INSERT EMOJI
     */
 
     function insertEmoji(emoji) {
@@ -629,26 +730,19 @@
         input.selectionEnd;
 
       const before =
-        input.value.substring(
-          0,
-          start
-        );
+        input.value.substring(0, start);
 
       const after =
-        input.value.substring(
-          end
-        );
+        input.value.substring(end);
 
       input.value =
         before +
         emoji +
         after;
 
-
       const newCursorPosition =
         start +
         emoji.length;
-
 
       input.focus();
 
@@ -656,7 +750,6 @@
         newCursorPosition,
         newCursorPosition
       );
-
 
       document
         .getElementById("emojiPicker")
@@ -666,7 +759,7 @@
 
 
     /*
-      CLOSE EMOJI PICKER WHEN CLICKING OUTSIDE IT
+      CLOSE EMOJI PICKER
     */
 
     document.addEventListener(
@@ -678,7 +771,6 @@
 
         const button =
           document.getElementById("emojiButton");
-
 
         if (
           picker.classList.contains("show") &&
@@ -737,10 +829,8 @@
 
         }
 
-
         const permission =
           await Notification.requestPermission();
-
 
         if (permission !== "granted") {
 
@@ -752,12 +842,10 @@
 
         }
 
-
         const registration =
           await navigator.serviceWorker.register(
             "/peggy-chat/firebase-messaging-sw.js"
           );
-
 
         const token =
           await messaging.getToken({
@@ -769,13 +857,11 @@
 
           });
 
-
         if (token) {
 
           console.log(
             "Notification token created."
           );
-
 
           await db.collection("notificationTokens")
             .doc(currentUser.uid)
@@ -791,7 +877,6 @@
                 firebase.firestore.FieldValue.serverTimestamp()
 
             });
-
 
           console.log(
             "Notification setup complete."
@@ -821,7 +906,6 @@
         "Foreground notification received:",
         payload
       );
-
 
       if (
         payload.notification &&
@@ -853,12 +937,10 @@
           .value
           .trim();
 
-
       const room =
         document.getElementById("roomInput")
           .value
           .trim();
-
 
       if (!name) {
 
@@ -869,7 +951,6 @@
 
       }
 
-
       if (!room) {
 
         document.getElementById("error").textContent =
@@ -878,7 +959,6 @@
         return;
 
       }
-
 
       if (!currentUser) {
 
@@ -889,34 +969,27 @@
 
       }
 
-
       username = name;
 
       roomCode = room;
 
-
       document.getElementById("loginScreen")
         .style.display = "none";
-
 
       document.getElementById("chatScreen")
         .style.display = "flex";
 
-
       document.getElementById("roomDisplay")
         .textContent = "Room: " + roomCode;
-
 
       listenForMessages();
 
       updatePresence();
 
-
       setInterval(
         updatePresence,
         20000
       );
-
 
       setupNotifications();
 
@@ -924,7 +997,7 @@
 
 
     /*
-      SEND MESSAGE
+      SEND TEXT MESSAGE
     */
 
     async function sendMessage() {
@@ -932,30 +1005,251 @@
       const input =
         document.getElementById("messageInput");
 
-
       const text =
         input.value.trim();
-
 
       if (!text) return;
 
       if (!currentUser) return;
 
-
       input.value = "";
 
-
       try {
-
-        /*
-          Save the message to Firestore.
-        */
 
         await db.collection("messages").add({
 
           room: roomCode,
 
           text: text,
+
+          sender: currentUser.uid,
+
+          senderName: username,
+
+          type: "text",
+
+          timestamp:
+            firebase.firestore.FieldValue.serverTimestamp(),
+
+          readBy: {
+
+            [currentUser.uid]: true
+
+          }
+
+        });
+
+
+        /*
+          SEND NOTIFICATION
+        */
+
+        sendNotification(text);
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Message could not be sent."
+        );
+
+      }
+
+    }
+
+
+    /*
+      SEND NOTIFICATION THROUGH VERCEL
+    */
+
+    async function sendNotification(notificationText) {
+
+      try {
+
+        const response =
+          await fetch(notificationServer, {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+              room: roomCode,
+
+              senderName: username,
+
+              senderUid: currentUser.uid,
+
+              text: notificationText
+
+            })
+
+          });
+
+        const result =
+          await response.json();
+
+        console.log(
+          "Notification server:",
+          result
+        );
+
+      } catch (notificationError) {
+
+        console.error(
+          "Notification request failed:",
+          notificationError
+        );
+
+      }
+
+    }
+
+
+    /*
+      OPEN PHONE / COMPUTER PHOTO PICKER
+    */
+
+    function openPhotoPicker() {
+
+      document
+        .getElementById("photoInput")
+        .click();
+
+    }
+
+
+    /*
+      PHOTO SELECTED
+    */
+
+    async function handlePhotoSelected(event) {
+
+      const file =
+        event.target.files[0];
+
+      if (!file) return;
+
+      if (!currentUser) {
+
+        alert(
+          "Please enter the chat first."
+        );
+
+        return;
+
+      }
+
+      if (!file.type.startsWith("image/")) {
+
+        alert(
+          "Please choose an image."
+        );
+
+        event.target.value = "";
+
+        return;
+
+      }
+
+      try {
+
+        const photoButton =
+          document.getElementById("photoButton");
+
+        const uploadStatus =
+          document.getElementById("uploadStatus");
+
+        photoButton.classList.add("uploading");
+
+        uploadStatus.textContent =
+          "Preparing photo...";
+
+        uploadStatus.classList.add("show");
+
+
+        /*
+          Resize/compress the image first.
+        */
+
+        const compressedFile =
+          await compressImage(file);
+
+
+        uploadStatus.textContent =
+          "Uploading photo...";
+
+
+        /*
+          Upload directly to Cloudinary.
+        */
+
+        const formData =
+          new FormData();
+
+        formData.append(
+          "file",
+          compressedFile
+        );
+
+        formData.append(
+          "upload_preset",
+          cloudinaryUploadPreset
+        );
+
+
+        const uploadResponse =
+          await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`,
+            {
+              method: "POST",
+              body: formData
+            }
+          );
+
+
+        if (!uploadResponse.ok) {
+
+          const errorText =
+            await uploadResponse.text();
+
+          console.error(
+            "Cloudinary error:",
+            errorText
+          );
+
+          throw new Error(
+            "Photo upload failed."
+          );
+
+        }
+
+
+        const uploadResult =
+          await uploadResponse.json();
+
+
+        const imageUrl =
+          uploadResult.secure_url;
+
+
+        /*
+          Save photo message to Firestore.
+        */
+
+        await db.collection("messages").add({
+
+          room: roomCode,
+
+          text: "",
+
+          imageUrl: imageUrl,
+
+          type: "image",
 
           sender: currentUser.uid,
 
@@ -974,63 +1268,219 @@
 
 
         /*
-          Ask Vercel to send notifications
-          to other devices in this room.
+          Tell the other device that
+          a photo was sent.
         */
 
-        try {
-
-          const response =
-            await fetch(notificationServer, {
-
-              method: "POST",
-
-              headers: {
-                "Content-Type": "application/json"
-              },
-
-              body: JSON.stringify({
-
-                room: roomCode,
-
-                senderName: username,
-
-                senderUid: currentUser.uid,
-
-                text: text
-
-              })
-
-            });
+        sendNotification(
+          "📷 Sent you a photo"
+        );
 
 
-          const result =
-            await response.json();
+        uploadStatus.textContent =
+          "Photo sent!";
 
+        setTimeout(() => {
 
-          console.log(
-            "Notification server:",
-            result
-          );
+          uploadStatus.classList.remove("show");
 
-        } catch (notificationError) {
+        }, 1200);
 
-          console.error(
-            "Notification request failed:",
-            notificationError
-          );
-
-        }
 
       } catch (error) {
 
-        console.error(error);
-
-        alert(
-          "Message could not be sent."
+        console.error(
+          "Photo upload error:",
+          error
         );
 
+        alert(
+          "Photo could not be sent. Please try again."
+        );
+
+        document
+          .getElementById("uploadStatus")
+          .classList.remove("show");
+
       }
+
+
+      document
+        .getElementById("photoButton")
+        .classList.remove("uploading");
+
+
+      /*
+        Reset file input so the same photo
+        can be selected again.
+      */
+
+      event.target.value = "";
+
+    }
+
+
+    /*
+      COMPRESS PHOTO
+    */
+
+    function compressImage(file) {
+
+      return new Promise((resolve, reject) => {
+
+        const reader =
+          new FileReader();
+
+        reader.onload = function(event) {
+
+          const image =
+            new Image();
+
+          image.onload = function() {
+
+            const maxWidth = 1600;
+
+            const maxHeight = 1600;
+
+            let width =
+              image.width;
+
+            let height =
+              image.height;
+
+
+            /*
+              Keep the original proportions.
+            */
+
+            if (
+              width > maxWidth ||
+              height > maxHeight
+            ) {
+
+              const widthRatio =
+                maxWidth / width;
+
+              const heightRatio =
+                maxHeight / height;
+
+              const ratio =
+                Math.min(
+                  widthRatio,
+                  heightRatio
+                );
+
+              width =
+                Math.round(
+                  width * ratio
+                );
+
+              height =
+                Math.round(
+                  height * ratio
+                );
+
+            }
+
+
+            const canvas =
+              document.createElement(
+                "canvas"
+              );
+
+            canvas.width =
+              width;
+
+            canvas.height =
+              height;
+
+
+            const context =
+              canvas.getContext(
+                "2d"
+              );
+
+
+            context.drawImage(
+              image,
+              0,
+              0,
+              width,
+              height
+            );
+
+
+            canvas.toBlob(
+              function(blob) {
+
+                if (!blob) {
+
+                  reject(
+                    new Error(
+                      "Could not compress image."
+                    )
+                  );
+
+                  return;
+
+                }
+
+
+                const compressedFile =
+                  new File(
+                    [blob],
+                    "matechat-photo.jpg",
+                    {
+                      type: "image/jpeg"
+                    }
+                  );
+
+
+                resolve(
+                  compressedFile
+                );
+
+              },
+              "image/jpeg",
+              0.82
+            );
+
+          };
+
+
+          image.onerror =
+            function() {
+
+              reject(
+                new Error(
+                  "Could not read image."
+                )
+              );
+
+            };
+
+
+          image.src =
+            event.target.result;
+
+        };
+
+
+        reader.onerror =
+          function() {
+
+            reject(
+              new Error(
+                "Could not read file."
+              )
+            );
+
+          };
+
+
+        reader.readAsDataURL(file);
+
+      });
 
     }
 
@@ -1039,7 +1489,8 @@
       ENTER KEY SENDS MESSAGE
     */
 
-    document.getElementById("messageInput")
+    document
+      .getElementById("messageInput")
       .addEventListener(
         "keydown",
         function(event) {
@@ -1068,7 +1519,6 @@
 
       }
 
-
       unsubscribeMessages =
         db.collection("messages")
           .where(
@@ -1085,8 +1535,9 @@
             (snapshot) => {
 
               const container =
-                document.getElementById("messages");
-
+                document.getElementById(
+                  "messages"
+                );
 
               container.innerHTML = "";
 
@@ -1175,34 +1626,84 @@
                   }
 
 
-                  div.innerHTML = `
+                  /*
+                    IMAGE MESSAGE
+                  */
 
-                    <div class="sender">
-                      ${escapeHTML(
-                        message.senderName ||
-                        "Unknown"
-                      )}
-                    </div>
+                  if (
+                    message.type === "image" &&
+                    message.imageUrl
+                  ) {
 
-                    <div class="message-text">
-                      ${escapeHTML(
-                        message.text
-                      )}
-                    </div>
+                    div.innerHTML = `
 
-                    <div class="message-info">
+                      <div class="sender">
+                        ${escapeHTML(
+                          message.senderName ||
+                          "Unknown"
+                        )}
+                      </div>
 
-                      ${timeText}
+                      <img
+                        class="message-image"
+                        src="${escapeHTML(
+                          message.imageUrl
+                        )}"
+                        alt="Photo"
+                        loading="lazy"
+                        onclick="window.open(this.src, '_blank')"
+                      >
 
-                      ${
-                        isMine
-                          ? " • " + readText
-                          : ""
-                      }
+                      <div class="message-info">
 
-                    </div>
+                        ${timeText}
 
-                  `;
+                        ${
+                          isMine
+                            ? " • " + readText
+                            : ""
+                        }
+
+                      </div>
+
+                    `;
+
+                  } else {
+
+                    /*
+                      NORMAL TEXT MESSAGE
+                    */
+
+                    div.innerHTML = `
+
+                      <div class="sender">
+                        ${escapeHTML(
+                          message.senderName ||
+                          "Unknown"
+                        )}
+                      </div>
+
+                      <div class="message-text">
+                        ${escapeHTML(
+                          message.text || ""
+                        )}
+                      </div>
+
+                      <div class="message-info">
+
+                        ${timeText}
+
+                        ${
+                          isMine
+                            ? " • " + readText
+                            : ""
+                        }
+
+                      </div>
+
+                    `;
+
+                  }
 
 
                   container.appendChild(
@@ -1265,7 +1766,6 @@
             (error) => {
 
               console.error(error);
-
 
               document.getElementById(
                 "messages"
