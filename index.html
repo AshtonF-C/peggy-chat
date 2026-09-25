@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -29,8 +28,6 @@
       margin: auto;
       background: #1f2937;
     }
-
-    /* LOGIN */
 
     #loginScreen {
       height: 100vh;
@@ -94,8 +91,6 @@
       color: #fca5a5;
       margin-top: 10px;
     }
-
-    /* CHAT */
 
     #chatScreen {
       display: none;
@@ -265,102 +260,101 @@
       }
     }
   </style>
-
 </head>
 
 <body>
 
-  <!-- LOGIN SCREEN -->
-
   <div id="loginScreen">
 
-```
-<div class="login-box">
+    <div class="login-box">
 
-  <h1>💬 MateChat</h1>
+      <h1>💬 MateChat</h1>
 
-  <p>Enter your name and your private room code.</p>
+      <p>Enter your name and your private room code.</p>
 
-  <input
-    id="nameInput"
-    type="text"
-    maxlength="20"
-    placeholder="Your name"
-  >
+      <input
+        id="nameInput"
+        type="text"
+        maxlength="20"
+        placeholder="Your name"
+      >
 
-  <input
-    id="roomInput"
-    type="text"
-    maxlength="30"
-    placeholder="Room code"
-  >
+      <input
+        id="roomInput"
+        type="text"
+        maxlength="30"
+        placeholder="Room code"
+      >
 
-  <button class="main-button" onclick="enterChat()">
-    Enter Chat
-  </button>
+      <button class="main-button" onclick="enterChat()">
+        Enter Chat
+      </button>
 
-  <div id="error"></div>
+      <div id="error"></div>
 
-</div>
-```
+    </div>
 
   </div>
 
-  <!-- CHAT SCREEN -->
 
   <div id="chatScreen">
 
-```
-<div class="header">
+    <div class="header">
 
-  <div class="header-left">
+      <div class="header-left">
 
-    <div class="logo">
-      💬 MateChat
+        <div class="logo">
+          💬 MateChat
+        </div>
+
+        <div class="room" id="roomDisplay"></div>
+
+      </div>
+
+      <div class="online">
+
+        <div class="online-dot"></div>
+
+        <span id="onlineText">
+          Connecting...
+        </span>
+
+      </div>
+
     </div>
 
-    <div class="room" id="roomDisplay"></div>
+
+    <div class="messages" id="messages">
+
+      <div class="empty" id="emptyMessage">
+        No messages yet.<br>
+        Send the first message!
+      </div>
+
+    </div>
+
+
+    <div class="composer">
+
+      <input
+        id="messageInput"
+        type="text"
+        maxlength="1000"
+        placeholder="Type a message..."
+        autocomplete="off"
+      >
+
+      <button
+        class="send-button"
+        onclick="sendMessage()"
+      >
+        ➤
+      </button>
+
+    </div>
 
   </div>
 
-  <div class="online">
-    <div class="online-dot"></div>
-    <span id="onlineText">Connecting...</span>
-  </div>
-
-</div>
-
-
-<div class="messages" id="messages">
-
-  <div class="empty" id="emptyMessage">
-    No messages yet.<br>
-    Send the first message!
-  </div>
-
-</div>
-
-
-<div class="composer">
-
-  <input
-    id="messageInput"
-    type="text"
-    maxlength="1000"
-    placeholder="Type a message..."
-    autocomplete="off"
-  >
-
-  <button class="send-button" onclick="sendMessage()">
-    ➤
-  </button>
-
-</div>
-```
-
-  </div>
-
-  <!-- FIREBASE -->
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 
@@ -369,6 +363,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
+
 
   <script>
 
@@ -393,15 +388,12 @@
     const messaging = firebase.messaging();
 
 
-    /*
-      FIREBASE CLOUD MESSAGING
-
-      This is the public Web Push certificate key
-      generated in Firebase Console.
-    */
-
     const vapidKey =
       "BMomp_XJjMiIV5crL8xF8vBHZ5XFoe37OKEeti8B4GKBeIZMmYne39RqCEyV8RbWrmUKwOJkEDvbsVWNZ8b3kuA";
+
+
+    const notificationServer =
+      "https://peggy-chat.vercel.app/api/notify";
 
 
     let currentUser = null;
@@ -410,16 +402,15 @@
     let unsubscribeMessages = null;
 
 
-    /*
-      SIGN IN ANONYMOUSLY
-    */
-
     auth.signInAnonymously()
       .then((result) => {
 
         currentUser = result.user;
 
-        console.log("Signed in:", currentUser.uid);
+        console.log(
+          "Signed in:",
+          currentUser.uid
+        );
 
       })
       .catch((error) => {
@@ -432,17 +423,15 @@
       });
 
 
-    /*
-      SET UP PUSH NOTIFICATIONS
-    */
-
     async function setupNotifications() {
 
       try {
 
         if (!("Notification" in window)) {
 
-          console.log("This browser does not support notifications.");
+          console.log(
+            "This browser does not support notifications."
+          );
 
           return;
 
@@ -455,16 +444,14 @@
 
         if (permission !== "granted") {
 
-          console.log("Notification permission was not granted.");
+          console.log(
+            "Notification permission was not granted."
+          );
 
           return;
 
         }
 
-
-        /*
-          Register the Firebase Messaging service worker.
-        */
 
         const registration =
           await navigator.serviceWorker.register(
@@ -472,31 +459,23 @@
           );
 
 
-        /*
-          Get this device's FCM token.
-        */
-
         const token =
           await messaging.getToken({
 
             vapidKey: vapidKey,
 
-            serviceWorkerRegistration: registration
+            serviceWorkerRegistration:
+              registration
 
           });
 
 
         if (token) {
 
-          console.log("Notification token created.");
+          console.log(
+            "Notification token created."
+          );
 
-
-          /*
-            Save this device's token in Firestore.
-
-            The token is associated with the current
-            anonymous Firebase user and room.
-          */
 
           await db.collection("notificationTokens")
             .doc(currentUser.uid)
@@ -514,7 +493,9 @@
             });
 
 
-          console.log("Notification setup complete.");
+          console.log(
+            "Notification setup complete."
+          );
 
         }
 
@@ -529,10 +510,6 @@
 
     }
 
-
-    /*
-      FOREGROUND NOTIFICATIONS
-    */
 
     messaging.onMessage((payload) => {
 
@@ -550,13 +527,10 @@
         new Notification(
           payload.notification.title || "MateChat",
           {
-
             body:
               payload.notification.body ||
               "You have a new message."
-
           }
-
         );
 
       }
@@ -564,17 +538,18 @@
     });
 
 
-    /*
-      ENTER CHAT
-    */
-
     function enterChat() {
 
       const name =
-        document.getElementById("nameInput").value.trim();
+        document.getElementById("nameInput")
+          .value
+          .trim();
+
 
       const room =
-        document.getElementById("roomInput").value.trim();
+        document.getElementById("roomInput")
+          .value
+          .trim();
 
 
       if (!name) {
@@ -612,42 +587,38 @@
       roomCode = room;
 
 
-      document.getElementById("loginScreen").style.display =
-        "none";
-
-      document.getElementById("chatScreen").style.display =
-        "flex";
+      document.getElementById("loginScreen")
+        .style.display = "none";
 
 
-      document.getElementById("roomDisplay").textContent =
-        "Room: " + roomCode;
+      document.getElementById("chatScreen")
+        .style.display = "flex";
+
+
+      document.getElementById("roomDisplay")
+        .textContent = "Room: " + roomCode;
 
 
       listenForMessages();
 
       updatePresence();
 
-      setInterval(updatePresence, 20000);
+      setInterval(
+        updatePresence,
+        20000
+      );
 
-
-      /*
-        Start notification setup after the user
-        presses Enter Chat.
-      */
 
       setupNotifications();
 
     }
 
 
-    /*
-      SEND MESSAGE
-    */
-
     async function sendMessage() {
 
       const input =
         document.getElementById("messageInput");
+
 
       const text =
         input.value.trim();
@@ -662,6 +633,10 @@
 
 
       try {
+
+        /*
+          First save the message to Firestore.
+        */
 
         await db.collection("messages").add({
 
@@ -684,38 +659,92 @@
 
         });
 
+
+        /*
+          Then ask the Vercel backend to send
+          notifications to the other devices
+          in this room.
+        */
+
+        try {
+
+          const response =
+            await fetch(notificationServer, {
+
+              method: "POST",
+
+              headers: {
+                "Content-Type": "application/json"
+              },
+
+              body: JSON.stringify({
+
+                room: roomCode,
+
+                senderName: username,
+
+                senderUid: currentUser.uid,
+
+                text: text
+
+              })
+
+            });
+
+
+          const result =
+            await response.json();
+
+
+          console.log(
+            "Notification server:",
+            result
+          );
+
+        } catch (notificationError) {
+
+          /*
+            The message was already saved successfully.
+            A notification failure should not make
+            the user think their message failed.
+          */
+
+          console.error(
+            "Notification request failed:",
+            notificationError
+          );
+
+        }
+
       } catch (error) {
 
         console.error(error);
 
-        alert("Message could not be sent.");
+        alert(
+          "Message could not be sent."
+        );
 
       }
 
     }
 
 
-    /*
-      ENTER KEY SENDS MESSAGE
-    */
-
     document.getElementById("messageInput")
-      .addEventListener("keydown", function(event) {
+      .addEventListener(
+        "keydown",
+        function(event) {
 
-        if (event.key === "Enter") {
+          if (event.key === "Enter") {
 
-          event.preventDefault();
+            event.preventDefault();
 
-          sendMessage();
+            sendMessage();
+
+          }
 
         }
+      );
 
-      });
-
-
-    /*
-      LISTEN FOR MESSAGES
-    */
 
     function listenForMessages() {
 
@@ -728,8 +757,15 @@
 
       unsubscribeMessages =
         db.collection("messages")
-          .where("room", "==", roomCode)
-          .orderBy("timestamp", "asc")
+          .where(
+            "room",
+            "==",
+            roomCode
+          )
+          .orderBy(
+            "timestamp",
+            "asc"
+          )
           .onSnapshot(
 
             (snapshot) => {
@@ -755,132 +791,151 @@
               }
 
 
-              snapshot.forEach(async (doc) => {
+              snapshot.forEach(
+                async (doc) => {
 
-                const message = doc.data();
-
-
-                const isMine =
-                  message.sender === currentUser.uid;
+                  const message =
+                    doc.data();
 
 
-                const div =
-                  document.createElement("div");
+                  const isMine =
+                    message.sender ===
+                    currentUser.uid;
 
 
-                div.className =
-                  "message " +
-                  (isMine ? "mine" : "theirs");
-
-
-                const time =
-                  message.timestamp
-                    ? message.timestamp.toDate()
-                    : new Date();
-
-
-                const timeText =
-                  time.toLocaleTimeString([], {
-
-                    hour: "2-digit",
-
-                    minute: "2-digit"
-
-                  });
-
-
-                let readText = "";
-
-
-                if (isMine) {
-
-                  const readBy =
-                    message.readBy || {};
-
-
-                  const someoneRead =
-                    Object.keys(readBy).some(
-
-                      uid =>
-                        uid !== currentUser.uid &&
-                        readBy[uid]
-
+                  const div =
+                    document.createElement(
+                      "div"
                     );
 
 
-                  readText =
-                    someoneRead
-                      ? "✓✓ Read"
-                      : "✓ Sent";
-
-                }
-
-
-                div.innerHTML = `
-
-                  <div class="sender">
-                    ${escapeHTML(
-                      message.senderName || "Unknown"
-                    )}
-                  </div>
-
-                  <div class="message-text">
-                    ${escapeHTML(message.text)}
-                  </div>
-
-                  <div class="message-info">
-
-                    ${timeText}
-
-                    ${isMine
-                      ? " • " + readText
-                      : ""}
-
-                  </div>
-
-                `;
+                  div.className =
+                    "message " +
+                    (
+                      isMine
+                        ? "mine"
+                        : "theirs"
+                    );
 
 
-                container.appendChild(div);
+                  const time =
+                    message.timestamp
+                      ? message.timestamp.toDate()
+                      : new Date();
 
 
-                /*
-                  Mark other people's messages as read.
-                */
+                  const timeText =
+                    time.toLocaleTimeString(
+                      [],
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      }
+                    );
 
-                if (!isMine) {
 
-                  const readBy =
-                    message.readBy || {};
+                  let readText = "";
 
 
-                  if (!readBy[currentUser.uid]) {
+                  if (isMine) {
 
-                    try {
+                    const readBy =
+                      message.readBy || {};
 
-                      await db.collection("messages")
-                        .doc(doc.id)
-                        .update({
 
-                          [`readBy.${currentUser.uid}`]:
-                            true
+                    const someoneRead =
+                      Object.keys(readBy)
+                        .some(
+                          uid =>
+                            uid !==
+                            currentUser.uid &&
+                            readBy[uid]
+                        );
 
-                        });
 
-                    } catch (error) {
+                    readText =
+                      someoneRead
+                        ? "✓✓ Read"
+                        : "✓ Sent";
 
-                      console.log(
-                        "Read receipt error:",
-                        error
-                      );
+                  }
+
+
+                  div.innerHTML = `
+
+                    <div class="sender">
+                      ${escapeHTML(
+                        message.senderName ||
+                        "Unknown"
+                      )}
+                    </div>
+
+                    <div class="message-text">
+                      ${escapeHTML(
+                        message.text
+                      )}
+                    </div>
+
+                    <div class="message-info">
+
+                      ${timeText}
+
+                      ${
+                        isMine
+                          ? " • " + readText
+                          : ""
+                      }
+
+                    </div>
+
+                  `;
+
+
+                  container.appendChild(
+                    div
+                  );
+
+
+                  if (!isMine) {
+
+                    const readBy =
+                      message.readBy || {};
+
+
+                    if (
+                      !readBy[
+                        currentUser.uid
+                      ]
+                    ) {
+
+                      try {
+
+                        await db
+                          .collection("messages")
+                          .doc(doc.id)
+                          .update({
+
+                            [
+                              `readBy.${currentUser.uid}`
+                            ]: true
+
+                          });
+
+                      } catch (error) {
+
+                        console.log(
+                          "Read receipt error:",
+                          error
+                        );
+
+                      }
 
                     }
 
                   }
 
                 }
-
-              });
+              );
 
 
               container.scrollTop =
@@ -894,10 +949,15 @@
               console.error(error);
 
 
-              document.getElementById("messages").innerHTML =
+              document.getElementById(
+                "messages"
+              ).innerHTML =
+
                 `<div class="empty">
                   Could not load messages.<br><br>
-                  ${escapeHTML(error.message)}
+                  ${escapeHTML(
+                    error.message
+                  )}
                 </div>`;
 
             }
@@ -907,13 +967,12 @@
     }
 
 
-    /*
-      ONLINE PRESENCE
-    */
-
     async function updatePresence() {
 
-      if (!currentUser || !roomCode) return;
+      if (
+        !currentUser ||
+        !roomCode
+      ) return;
 
 
       try {
@@ -932,8 +991,10 @@
           });
 
 
-        document.getElementById("onlineText").textContent =
-          "Online";
+        document.getElementById(
+          "onlineText"
+        ).textContent = "Online";
+
 
       } catch (error) {
 
@@ -947,23 +1008,34 @@
     }
 
 
-    /*
-      BASIC HTML SECURITY
-    */
-
     function escapeHTML(text) {
 
       return String(text)
 
-        .replace(/&/g, "&amp;")
+        .replace(
+          /&/g,
+          "&amp;"
+        )
 
-        .replace(/</g, "&lt;")
+        .replace(
+          /</g,
+          "&lt;"
+        )
 
-        .replace(/>/g, "&gt;")
+        .replace(
+          />/g,
+          "&gt;"
+        )
 
-        .replace(/"/g, "&quot;")
+        .replace(
+          /"/g,
+          "&quot;"
+        )
 
-        .replace(/'/g, "&#039;");
+        .replace(
+          /'/g,
+          "&#039;"
+        );
 
     }
 
