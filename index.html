@@ -185,7 +185,10 @@
       margin-top: 4px;
     }
 
+    /* COMPOSER */
+
     .composer {
+      position: relative;
       display: flex;
       gap: 8px;
       padding: 12px;
@@ -195,6 +198,7 @@
 
     .composer input {
       flex: 1;
+      min-width: 0;
       padding: 13px;
       border: none;
       border-radius: 20px;
@@ -204,8 +208,30 @@
       font-size: 16px;
     }
 
+    .composer input::placeholder {
+      color: #9ca3af;
+    }
+
+    .emoji-button {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border: none;
+      border-radius: 50%;
+      background: #374151;
+      color: white;
+      font-size: 23px;
+      cursor: pointer;
+    }
+
+    .emoji-button:hover {
+      background: #4b5563;
+    }
+
     .send-button {
       width: 50px;
+      height: 48px;
+      flex-shrink: 0;
       border: none;
       border-radius: 50%;
       background: #3b82f6;
@@ -218,6 +244,55 @@
       background: #2563eb;
     }
 
+    /* EMOJI PICKER */
+
+    .emoji-picker {
+      display: none;
+      position: absolute;
+      right: 65px;
+      bottom: 70px;
+      width: 300px;
+      max-height: 280px;
+      overflow-y: auto;
+      background: #1f2937;
+      border: 1px solid #4b5563;
+      border-radius: 15px;
+      padding: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+      z-index: 100;
+    }
+
+    .emoji-picker.show {
+      display: block;
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .emoji-item {
+      border: none;
+      background: transparent;
+      color: white;
+      font-size: 25px;
+      padding: 5px;
+      border-radius: 8px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .emoji-item:hover {
+      background: #374151;
+    }
+
+    .emoji-title {
+      color: #9ca3af;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
     .empty {
       text-align: center;
       color: #9ca3af;
@@ -225,6 +300,7 @@
     }
 
     @media (max-width: 600px) {
+
       body {
         height: 100dvh;
         min-height: 100dvh;
@@ -257,6 +333,17 @@
 
       .message {
         max-width: 85%;
+      }
+
+      .emoji-picker {
+        right: 10px;
+        bottom: 68px;
+        width: calc(100vw - 20px);
+        max-height: 260px;
+      }
+
+      .emoji-grid {
+        grid-template-columns: repeat(7, 1fr);
       }
     }
   </style>
@@ -336,6 +423,34 @@
 
     <div class="composer">
 
+      <!-- EMOJI PICKER -->
+
+      <div class="emoji-picker" id="emojiPicker">
+
+        <div class="emoji-title">
+          Choose an emoji
+        </div>
+
+        <div class="emoji-grid" id="emojiGrid"></div>
+
+      </div>
+
+
+      <!-- EMOJI BUTTON -->
+
+      <button
+        class="emoji-button"
+        id="emojiButton"
+        type="button"
+        onclick="toggleEmojiPicker()"
+        title="Emoji"
+      >
+        😊
+      </button>
+
+
+      <!-- MESSAGE INPUT -->
+
       <input
         id="messageInput"
         type="text"
@@ -344,9 +459,13 @@
         autocomplete="off"
       >
 
+
+      <!-- SEND BUTTON -->
+
       <button
         class="send-button"
         onclick="sendMessage()"
+        type="button"
       >
         ➤
       </button>
@@ -355,6 +474,8 @@
 
   </div>
 
+
+  <!-- FIREBASE -->
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 
@@ -402,6 +523,181 @@
     let unsubscribeMessages = null;
 
 
+    /*
+      EMOJI LIST
+    */
+
+    const emojis = [
+
+      "😀","😃","😄","😁","😆","😅","😂","🤣",
+      "😊","😇","🙂","🙃","😉","😌","😍","🥰",
+      "😘","😗","😙","😚","😋","😛","😝","😜",
+      "🤪","🤨","🧐","🤓","😎","🤩","🥳","😏",
+      "😒","😞","😔","😟","😕","🙁","☹️","😣",
+      "😖","😫","😩","🥺","😢","😭","😤","😠",
+      "😡","🤬","🤯","😳","🥵","🥶","😱","😨",
+      "😰","😥","😓","🤗","🤔","🫣","🤭","🤫",
+      "🤥","😶","🫠","😐","🫡","😑","😬","🙄",
+      "😯","😦","😧","😮","😲","🥱","😴","🤤",
+      "😪","😵","🤐","🤢","🤮","🤧","😷","🤒",
+      "🤕","🤑","🤠","😈","👿","👹","👺","🤡",
+      "💩","👻","💀","☠️","👽","👾","🤖","🎃",
+
+      "❤️","🧡","💛","💚","💙","💜","🖤","🤍",
+      "🤎","💔","❣️","💕","💞","💓","💗","💖",
+      "💘","💝","💟","💯","💢","💥","💫","💦",
+      "💨","💬","💭","💤",
+
+      "👍","👎","👌","✌️","🤞","🤟","🤘","🤙",
+      "👏","🙌","🫶","🙏","💪","👋","🤝","☝️",
+      "👇","👈","👉","👆","✋","🤚","🖐️","🖖",
+      "👀","👄","👅","👂","👃","🧠",
+
+      "🔥","✨","⭐","🌟","💎","🎉","🎊","🎈",
+      "🎁","🏆","🥇","🥈","🥉","⚡","💥","🌈",
+      "☀️","🌙","🌞","🌸","🌹","🌺","🌻","🌼",
+
+      "🍕","🍔","🍟","🌭","🍿","🍩","🍪","🎂",
+      "🍰","🍫","🍭","🍬","🍎","🍓","🍌","🍉",
+      "🍇","🍒","🥑","🌮","🍗","🍳","🍦","☕",
+
+      "⚽","🏀","🏈","⚾","🎾","🏐","🎮","🎯",
+      "🎵","🎶","🎸","🎤","🎧","📱","💻","🚗",
+      "✈️","🚀","🏠","🎥","📸","💡","🔑","💰"
+
+    ];
+
+
+    /*
+      CREATE EMOJI BUTTONS
+    */
+
+    const emojiGrid =
+      document.getElementById("emojiGrid");
+
+
+    emojis.forEach((emoji) => {
+
+      const button =
+        document.createElement("button");
+
+      button.type = "button";
+
+      button.className = "emoji-item";
+
+      button.textContent = emoji;
+
+      button.title = emoji;
+
+      button.addEventListener(
+        "click",
+        () => insertEmoji(emoji)
+      );
+
+      emojiGrid.appendChild(button);
+
+    });
+
+
+    /*
+      OPEN / CLOSE EMOJI PICKER
+    */
+
+    function toggleEmojiPicker() {
+
+      const picker =
+        document.getElementById("emojiPicker");
+
+      picker.classList.toggle("show");
+
+    }
+
+
+    /*
+      INSERT EMOJI INTO MESSAGE BOX
+    */
+
+    function insertEmoji(emoji) {
+
+      const input =
+        document.getElementById("messageInput");
+
+      const start =
+        input.selectionStart;
+
+      const end =
+        input.selectionEnd;
+
+      const before =
+        input.value.substring(
+          0,
+          start
+        );
+
+      const after =
+        input.value.substring(
+          end
+        );
+
+      input.value =
+        before +
+        emoji +
+        after;
+
+
+      const newCursorPosition =
+        start +
+        emoji.length;
+
+
+      input.focus();
+
+      input.setSelectionRange(
+        newCursorPosition,
+        newCursorPosition
+      );
+
+
+      document
+        .getElementById("emojiPicker")
+        .classList.remove("show");
+
+    }
+
+
+    /*
+      CLOSE EMOJI PICKER WHEN CLICKING OUTSIDE IT
+    */
+
+    document.addEventListener(
+      "click",
+      function(event) {
+
+        const picker =
+          document.getElementById("emojiPicker");
+
+        const button =
+          document.getElementById("emojiButton");
+
+
+        if (
+          picker.classList.contains("show") &&
+          !picker.contains(event.target) &&
+          event.target !== button
+        ) {
+
+          picker.classList.remove("show");
+
+        }
+
+      }
+    );
+
+
+    /*
+      FIREBASE LOGIN
+    */
+
     auth.signInAnonymously()
       .then((result) => {
 
@@ -422,6 +718,10 @@
 
       });
 
+
+    /*
+      NOTIFICATIONS
+    */
 
     async function setupNotifications() {
 
@@ -511,6 +811,10 @@
     }
 
 
+    /*
+      FOREGROUND NOTIFICATIONS
+    */
+
     messaging.onMessage((payload) => {
 
       console.log(
@@ -537,6 +841,10 @@
 
     });
 
+
+    /*
+      ENTER CHAT
+    */
 
     function enterChat() {
 
@@ -603,6 +911,7 @@
 
       updatePresence();
 
+
       setInterval(
         updatePresence,
         20000
@@ -613,6 +922,10 @@
 
     }
 
+
+    /*
+      SEND MESSAGE
+    */
 
     async function sendMessage() {
 
@@ -635,7 +948,7 @@
       try {
 
         /*
-          First save the message to Firestore.
+          Save the message to Firestore.
         */
 
         await db.collection("messages").add({
@@ -661,9 +974,8 @@
 
 
         /*
-          Then ask the Vercel backend to send
-          notifications to the other devices
-          in this room.
+          Ask Vercel to send notifications
+          to other devices in this room.
         */
 
         try {
@@ -703,12 +1015,6 @@
 
         } catch (notificationError) {
 
-          /*
-            The message was already saved successfully.
-            A notification failure should not make
-            the user think their message failed.
-          */
-
           console.error(
             "Notification request failed:",
             notificationError
@@ -729,6 +1035,10 @@
     }
 
 
+    /*
+      ENTER KEY SENDS MESSAGE
+    */
+
     document.getElementById("messageInput")
       .addEventListener(
         "keydown",
@@ -745,6 +1055,10 @@
         }
       );
 
+
+    /*
+      LOAD MESSAGES
+    */
 
     function listenForMessages() {
 
@@ -896,6 +1210,10 @@
                   );
 
 
+                  /*
+                    MARK MESSAGE AS READ
+                  */
+
                   if (!isMine) {
 
                     const readBy =
@@ -967,6 +1285,10 @@
     }
 
 
+    /*
+      ONLINE PRESENCE
+    */
+
     async function updatePresence() {
 
       if (
@@ -1007,6 +1329,10 @@
 
     }
 
+
+    /*
+      HTML ESCAPING
+    */
 
     function escapeHTML(text) {
 
