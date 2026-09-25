@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -228,42 +229,43 @@
       margin: auto;
     }
 
-   @media (max-width: 600px) {
-  body {
-    height: 100dvh;
-    min-height: 100dvh;
-    overflow: hidden;
-  }
+    @media (max-width: 600px) {
+      body {
+        height: 100dvh;
+        min-height: 100dvh;
+        overflow: hidden;
+      }
 
-  #chatScreen {
-    height: 100dvh;
-    min-height: 0;
-  }
+      #chatScreen {
+        height: 100dvh;
+        min-height: 0;
+      }
 
-  .header {
-    height: 62px;
-    flex-shrink: 0;
-  }
+      .header {
+        height: 62px;
+        flex-shrink: 0;
+      }
 
-  .messages {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 12px;
-  }
+      .messages {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 12px;
+      }
 
-  .composer {
-    flex-shrink: 0;
-    position: sticky;
-    bottom: 0;
-    padding: 10px;
-  }
+      .composer {
+        flex-shrink: 0;
+        position: sticky;
+        bottom: 0;
+        padding: 10px;
+      }
 
-  .message {
-    max-width: 85%;
-  }
-}
+      .message {
+        max-width: 85%;
+      }
+    }
   </style>
+
 </head>
 
 <body>
@@ -272,89 +274,91 @@
 
   <div id="loginScreen">
 
-    <div class="login-box">
+```
+<div class="login-box">
 
-      <h1>💬 MateChat</h1>
+  <h1>💬 MateChat</h1>
 
-      <p>Enter your name and your private room code.</p>
+  <p>Enter your name and your private room code.</p>
 
-      <input
-        id="nameInput"
-        type="text"
-        maxlength="20"
-        placeholder="Your name"
-      >
+  <input
+    id="nameInput"
+    type="text"
+    maxlength="20"
+    placeholder="Your name"
+  >
 
-      <input
-        id="roomInput"
-        type="text"
-        maxlength="30"
-        placeholder="Room code"
-      >
+  <input
+    id="roomInput"
+    type="text"
+    maxlength="30"
+    placeholder="Room code"
+  >
 
-      <button class="main-button" onclick="enterChat()">
-        Enter Chat
-      </button>
+  <button class="main-button" onclick="enterChat()">
+    Enter Chat
+  </button>
 
-      <div id="error"></div>
+  <div id="error"></div>
 
-    </div>
+</div>
+```
 
   </div>
-
 
   <!-- CHAT SCREEN -->
 
   <div id="chatScreen">
 
-    <div class="header">
+```
+<div class="header">
 
-      <div class="header-left">
+  <div class="header-left">
 
-        <div class="logo">
-          💬 MateChat
-        </div>
-
-        <div class="room" id="roomDisplay"></div>
-
-      </div>
-
-      <div class="online">
-        <div class="online-dot"></div>
-        <span id="onlineText">Connecting...</span>
-      </div>
-
+    <div class="logo">
+      💬 MateChat
     </div>
 
-
-    <div class="messages" id="messages">
-
-      <div class="empty" id="emptyMessage">
-        No messages yet.<br>
-        Send the first message!
-      </div>
-
-    </div>
-
-
-    <div class="composer">
-
-      <input
-        id="messageInput"
-        type="text"
-        maxlength="1000"
-        placeholder="Type a message..."
-        autocomplete="off"
-      >
-
-      <button class="send-button" onclick="sendMessage()">
-        ➤
-      </button>
-
-    </div>
+    <div class="room" id="roomDisplay"></div>
 
   </div>
 
+  <div class="online">
+    <div class="online-dot"></div>
+    <span id="onlineText">Connecting...</span>
+  </div>
+
+</div>
+
+
+<div class="messages" id="messages">
+
+  <div class="empty" id="emptyMessage">
+    No messages yet.<br>
+    Send the first message!
+  </div>
+
+</div>
+
+
+<div class="composer">
+
+  <input
+    id="messageInput"
+    type="text"
+    maxlength="1000"
+    placeholder="Type a message..."
+    autocomplete="off"
+  >
+
+  <button class="send-button" onclick="sendMessage()">
+    ➤
+  </button>
+
+</div>
+```
+
+  </div>
 
   <!-- FIREBASE -->
 
@@ -364,6 +368,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
 
   <script>
 
@@ -384,6 +389,19 @@
     const auth = firebase.auth();
 
     const db = firebase.firestore();
+
+    const messaging = firebase.messaging();
+
+
+    /*
+      FIREBASE CLOUD MESSAGING
+
+      This is the public Web Push certificate key
+      generated in Firebase Console.
+    */
+
+    const vapidKey =
+      "BMomp_XJjMiIV5crL8xF8vBHZ5XFoe37OKEeti8B4GKBeIZMmYne39RqCEyV8RbWrmUKwOJkEDvbsVWNZ8b3kuA";
 
 
     let currentUser = null;
@@ -415,6 +433,138 @@
 
 
     /*
+      SET UP PUSH NOTIFICATIONS
+    */
+
+    async function setupNotifications() {
+
+      try {
+
+        if (!("Notification" in window)) {
+
+          console.log("This browser does not support notifications.");
+
+          return;
+
+        }
+
+
+        const permission =
+          await Notification.requestPermission();
+
+
+        if (permission !== "granted") {
+
+          console.log("Notification permission was not granted.");
+
+          return;
+
+        }
+
+
+        /*
+          Register the Firebase Messaging service worker.
+        */
+
+        const registration =
+          await navigator.serviceWorker.register(
+            "/peggy-chat/firebase-messaging-sw.js"
+          );
+
+
+        /*
+          Get this device's FCM token.
+        */
+
+        const token =
+          await messaging.getToken({
+
+            vapidKey: vapidKey,
+
+            serviceWorkerRegistration: registration
+
+          });
+
+
+        if (token) {
+
+          console.log("Notification token created.");
+
+
+          /*
+            Save this device's token in Firestore.
+
+            The token is associated with the current
+            anonymous Firebase user and room.
+          */
+
+          await db.collection("notificationTokens")
+            .doc(currentUser.uid)
+            .set({
+
+              token: token,
+
+              username: username,
+
+              room: roomCode,
+
+              updatedAt:
+                firebase.firestore.FieldValue.serverTimestamp()
+
+            });
+
+
+          console.log("Notification setup complete.");
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Notification setup failed:",
+          error
+        );
+
+      }
+
+    }
+
+
+    /*
+      FOREGROUND NOTIFICATIONS
+    */
+
+    messaging.onMessage((payload) => {
+
+      console.log(
+        "Foreground notification received:",
+        payload
+      );
+
+
+      if (
+        payload.notification &&
+        Notification.permission === "granted"
+      ) {
+
+        new Notification(
+          payload.notification.title || "MateChat",
+          {
+
+            body:
+              payload.notification.body ||
+              "You have a new message."
+
+          }
+
+        );
+
+      }
+
+    });
+
+
+    /*
       ENTER CHAT
     */
 
@@ -433,6 +583,7 @@
           "Please enter your name.";
 
         return;
+
       }
 
 
@@ -442,6 +593,7 @@
           "Please enter a room code.";
 
         return;
+
       }
 
 
@@ -451,6 +603,7 @@
           "Still connecting to Firebase. Try again in a second.";
 
         return;
+
       }
 
 
@@ -475,6 +628,14 @@
       updatePresence();
 
       setInterval(updatePresence, 20000);
+
+
+      /*
+        Start notification setup after the user
+        presses Enter Chat.
+      */
+
+      setupNotifications();
 
     }
 
@@ -512,10 +673,13 @@
 
           senderName: username,
 
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          timestamp:
+            firebase.firestore.FieldValue.serverTimestamp(),
 
           readBy: {
+
             [currentUser.uid]: true
+
           }
 
         });
@@ -595,6 +759,7 @@
 
                 const message = doc.data();
 
+
                 const isMine =
                   message.sender === currentUser.uid;
 
@@ -616,8 +781,11 @@
 
                 const timeText =
                   time.toLocaleTimeString([], {
+
                     hour: "2-digit",
+
                     minute: "2-digit"
+
                   });
 
 
@@ -629,14 +797,21 @@
                   const readBy =
                     message.readBy || {};
 
+
                   const someoneRead =
                     Object.keys(readBy).some(
-                      uid => uid !== currentUser.uid && readBy[uid]
+
+                      uid =>
+                        uid !== currentUser.uid &&
+                        readBy[uid]
+
                     );
 
 
                   readText =
-                    someoneRead ? "✓✓ Read" : "✓ Sent";
+                    someoneRead
+                      ? "✓✓ Read"
+                      : "✓ Sent";
 
                 }
 
@@ -644,7 +819,9 @@
                 div.innerHTML = `
 
                   <div class="sender">
-                    ${escapeHTML(message.senderName || "Unknown")}
+                    ${escapeHTML(
+                      message.senderName || "Unknown"
+                    )}
                   </div>
 
                   <div class="message-text">
@@ -655,7 +832,9 @@
 
                     ${timeText}
 
-                    ${isMine ? " • " + readText : ""}
+                    ${isMine
+                      ? " • " + readText
+                      : ""}
 
                   </div>
 
@@ -666,7 +845,7 @@
 
 
                 /*
-                  Mark other people's messages as read
+                  Mark other people's messages as read.
                 */
 
                 if (!isMine) {
@@ -683,13 +862,17 @@
                         .doc(doc.id)
                         .update({
 
-                          [`readBy.${currentUser.uid}`]: true
+                          [`readBy.${currentUser.uid}`]:
+                            true
 
                         });
 
                     } catch (error) {
 
-                      console.log("Read receipt error:", error);
+                      console.log(
+                        "Read receipt error:",
+                        error
+                      );
 
                     }
 
@@ -705,9 +888,11 @@
 
             },
 
+
             (error) => {
 
               console.error(error);
+
 
               document.getElementById("messages").innerHTML =
                 `<div class="empty">
@@ -746,12 +931,16 @@
 
           });
 
+
         document.getElementById("onlineText").textContent =
           "Online";
 
       } catch (error) {
 
-        console.log("Presence error:", error);
+        console.log(
+          "Presence error:",
+          error
+        );
 
       }
 
