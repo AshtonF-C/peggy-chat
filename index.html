@@ -150,9 +150,14 @@
 
     .message {
       max-width: 75%;
+      transition: box-shadow 0.25s ease;
       padding: 10px 13px;
       border-radius: 15px;
       word-wrap: break-word;
+    }
+
+    .message.highlight-message {
+      box-shadow: 0 0 0 3px rgba(147,197,253,0.8);
     }
 
     .message.mine {
@@ -176,6 +181,145 @@
     .message-text {
       font-size: 16px;
       line-height: 1.35;
+    }
+
+    .reply-button {
+      border: none;
+      background: transparent;
+      color: #cbd5e1;
+      font-size: 11px;
+      padding: 3px 0;
+      margin-top: 5px;
+      cursor: pointer;
+      opacity: 0.75;
+    }
+
+    .reply-button:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .reply-reference {
+      padding: 7px 9px;
+      margin-bottom: 7px;
+      border-left: 3px solid #93c5fd;
+      background: rgba(0,0,0,0.18);
+      border-radius: 7px;
+      cursor: pointer;
+      max-width: 100%;
+    }
+
+    .reply-reference:hover {
+      background: rgba(0,0,0,0.25);
+    }
+
+    .reply-reference-name {
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .reply-reference-text {
+      font-size: 12px;
+      opacity: 0.8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .reply-preview {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: #1f2937;
+      border-top: 1px solid #374151;
+    }
+
+    .reply-preview.show {
+      display: flex;
+    }
+
+    .reply-preview-content {
+      min-width: 0;
+      flex: 1;
+      border-left: 3px solid #3b82f6;
+      padding-left: 9px;
+    }
+
+    .reply-preview-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #93c5fd;
+      margin-bottom: 2px;
+    }
+
+    .reply-preview-text {
+      font-size: 13px;
+      color: #d1d5db;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cancel-reply {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border: none;
+      border-radius: 50%;
+      background: #374151;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .cancel-reply:hover {
+      background: #4b5563;
+    }
+
+    .typing-indicator {
+      display: none;
+      padding: 0 16px 6px;
+      background: #111827;
+    }
+
+    .typing-indicator.show {
+      display: block;
+    }
+
+    .typing-dots {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 20px;
+    }
+
+    .typing-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #9ca3af;
+      animation: typingBounce 1.2s infinite ease-in-out;
+    }
+
+    .typing-dots span:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .typing-dots span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+      }
+      30% {
+        transform: translateY(-4px);
+        opacity: 1;
+      }
     }
 
     .message-info {
@@ -380,6 +524,14 @@
         max-width: 85%;
       }
 
+      .reply-preview {
+        padding: 8px 10px;
+      }
+
+      .typing-indicator {
+        padding-left: 12px;
+      }
+
       .message-image {
         max-width: 250px;
         max-height: 350px;
@@ -470,6 +622,20 @@
 
     </div>
 
+
+    <div id="typingIndicator" class="typing-indicator">
+      <div class="typing-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div id="replyPreview" class="reply-preview">
+      <div class="reply-preview-content">
+        <div id="replyPreviewTitle" class="reply-preview-title">Replying</div>
+        <div id="replyPreviewText" class="reply-preview-text"></div>
+      </div>
+      <button class="cancel-reply" type="button" onclick="cancelReply()" title="Cancel reply">×</button>
+    </div>
 
     <div class="composer">
 
@@ -622,6 +788,11 @@
     let username = "";
     let roomCode = "";
     let unsubscribeMessages = null;
+    let unsubscribePresence = null;
+    let typingTimeout = null;
+    let typingWriteTimeout = null;
+    let isCurrentlyTyping = false;
+    let replyingTo = null;
 
 
     /*
@@ -983,6 +1154,7 @@
         .textContent = "Room: " + roomCode;
 
       listenForMessages();
+      listenForTyping();
 
       updatePresence();
 
@@ -1013,6 +1185,10 @@
       if (!currentUser) return;
 
       input.value = "";
+      stopTyping();
+
+      const replyTo = replyingTo;
+      cancelReply();
 
       try {
 
@@ -1027,6 +1203,8 @@
           senderName: username,
 
           type: "text",
+
+          ...(replyTo ? { replyTo: replyTo } : {}),
 
           timestamp:
             firebase.firestore.FieldValue.serverTimestamp(),
@@ -1158,6 +1336,10 @@
 
       try {
 
+        stopTyping();
+        const replyTo = replyingTo;
+        cancelReply();
+
         const photoButton =
           document.getElementById("photoButton");
 
@@ -1254,6 +1436,8 @@
           sender: currentUser.uid,
 
           senderName: username,
+
+          ...(replyTo ? { replyTo: replyTo } : {}),
 
           timestamp:
             firebase.firestore.FieldValue.serverTimestamp(),
@@ -1486,8 +1670,184 @@
 
 
     /*
+      REPLY TO A MESSAGE
+    */
+
+    function startReply(messageId, message) {
+
+      replyingTo = {
+        id: messageId,
+        sender: message.sender || "",
+        senderName: message.senderName || "Unknown",
+        text: message.text || "",
+        imageUrl: message.imageUrl || "",
+        type: message.type || "text"
+      };
+
+      const preview = document.getElementById("replyPreview");
+      const title = document.getElementById("replyPreviewTitle");
+      const previewText = document.getElementById("replyPreviewText");
+
+      title.textContent = "Replying to " + replyingTo.senderName;
+      previewText.textContent =
+        replyingTo.type === "image"
+          ? "📷 Photo"
+          : replyingTo.text || "Message";
+
+      preview.classList.add("show");
+
+      document.getElementById("messageInput").focus();
+
+      document.getElementById("messages").scrollTop =
+        document.getElementById("messages").scrollHeight;
+    }
+
+
+    function cancelReply() {
+
+      replyingTo = null;
+
+      document
+        .getElementById("replyPreview")
+        .classList.remove("show");
+
+    }
+
+
+    function jumpToMessage(messageId) {
+
+      const target = document.getElementById("message-" + messageId);
+
+      if (!target) return;
+
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+      target.classList.add("highlight-message");
+
+      setTimeout(() => {
+        target.classList.remove("highlight-message");
+      }, 1200);
+    }
+
+
+    /*
+      TYPING STATUS
+    */
+
+    function updateTypingStatus() {
+
+      const input = document.getElementById("messageInput");
+
+      if (!input.value.trim()) {
+        stopTyping();
+        return;
+      }
+
+      if (!isCurrentlyTyping) {
+        isCurrentlyTyping = true;
+        setTypingStatus(true);
+      }
+
+      clearTimeout(typingTimeout);
+
+      typingTimeout = setTimeout(() => {
+        stopTyping();
+      }, 2000);
+    }
+
+
+    async function setTypingStatus(typing) {
+
+      if (!currentUser || !roomCode) return;
+
+      clearTimeout(typingWriteTimeout);
+
+      typingWriteTimeout = setTimeout(async () => {
+        try {
+          await db.collection("presence")
+            .doc(currentUser.uid)
+            .set({
+              username: username,
+              room: roomCode,
+              typing: typing,
+              typingAt: firebase.firestore.FieldValue.serverTimestamp(),
+              lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        } catch (error) {
+          console.log("Typing status error:", error);
+        }
+      }, 50);
+    }
+
+
+    function stopTyping() {
+
+      clearTimeout(typingTimeout);
+      isCurrentlyTyping = false;
+      setTypingStatus(false);
+    }
+
+
+    function listenForTyping() {
+
+      if (unsubscribePresence) {
+        unsubscribePresence();
+      }
+
+      unsubscribePresence = db.collection("presence")
+        .where("room", "==", roomCode)
+        .onSnapshot((snapshot) => {
+
+          let someoneTyping = false;
+
+          const now = Date.now();
+
+          snapshot.forEach((doc) => {
+
+            if (doc.id === currentUser.uid) return;
+
+            const data = doc.data();
+
+            if (data.typing === true) {
+
+              let typingTime = 0;
+
+              if (data.typingAt && data.typingAt.toMillis) {
+                typingTime = data.typingAt.toMillis();
+              }
+
+              if (typingTime && now - typingTime < 4000) {
+                someoneTyping = true;
+              }
+            }
+          });
+
+          document
+            .getElementById("typingIndicator")
+            .classList.toggle("show", someoneTyping);
+
+        }, (error) => {
+          console.log("Typing listener error:", error);
+        });
+    }
+
+
+    /*
       ENTER KEY SENDS MESSAGE
     */
+
+    document
+      .getElementById("messageInput")
+      .addEventListener(
+        "input",
+        function() {
+          updateTypingStatus();
+        }
+      );
+
 
     document
       .getElementById("messageInput")
@@ -1574,6 +1934,8 @@
                     );
 
 
+                  div.id = "message-" + doc.id;
+
                   div.className =
                     "message " +
                     (
@@ -1626,6 +1988,33 @@
                   }
 
 
+                  const reply = message.replyTo || null;
+
+                  let replyHTML = "";
+
+                  if (reply) {
+
+                    const replyPreviewText =
+                      reply.type === "image"
+                        ? "📷 Photo"
+                        : (reply.text || "Message");
+
+                    replyHTML = `
+                      <div class="reply-reference" data-jump-id="${escapeHTML(reply.id || "")}">
+                        <div class="reply-reference-name">
+                          ${escapeHTML(reply.senderName || "Unknown")}
+                        </div>
+                        <div class="reply-reference-text">
+                          ${escapeHTML(replyPreviewText)}
+                        </div>
+                      </div>
+                    `;
+                  }
+
+                  const replyButtonHTML = `
+                    <button class="reply-button" type="button">↩ Reply</button>
+                  `;
+
                   /*
                     IMAGE MESSAGE
                   */
@@ -1644,6 +2033,8 @@
                         )}
                       </div>
 
+                      ${replyHTML}
+
                       <img
                         class="message-image"
                         src="${escapeHTML(
@@ -1651,8 +2042,9 @@
                         )}"
                         alt="Photo"
                         loading="lazy"
-                        onclick="window.open(this.src, '_blank')"
                       >
+
+                      ${replyButtonHTML}
 
                       <div class="message-info">
 
@@ -1683,11 +2075,15 @@
                         )}
                       </div>
 
+                      ${replyHTML}
+
                       <div class="message-text">
                         ${escapeHTML(
                           message.text || ""
                         )}
                       </div>
+
+                      ${replyButtonHTML}
 
                       <div class="message-info">
 
@@ -1705,6 +2101,32 @@
 
                   }
 
+                  const replyButton =
+                    div.querySelector(".reply-button");
+
+                  replyButton.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    startReply(doc.id, message);
+                  });
+
+                  const replyReference =
+                    div.querySelector(".reply-reference");
+
+                  if (replyReference) {
+                    replyReference.addEventListener("click", (event) => {
+                      event.stopPropagation();
+                      jumpToMessage(replyReference.dataset.jumpId);
+                    });
+                  }
+
+                  const messageImage =
+                    div.querySelector(".message-image");
+
+                  if (messageImage) {
+                    messageImage.addEventListener("click", () => {
+                      window.open(messageImage.src, "_blank");
+                    });
+                  }
 
                   container.appendChild(
                     div
@@ -1810,7 +2232,7 @@
             lastSeen:
               firebase.firestore.FieldValue.serverTimestamp()
 
-          });
+          }, { merge: true });
 
 
         document.getElementById(
@@ -1828,6 +2250,23 @@
       }
 
     }
+
+
+    /*
+      STOP TYPING WHEN LEAVING THE PAGE
+    */
+
+    window.addEventListener("beforeunload", () => {
+      if (currentUser && roomCode) {
+        db.collection("presence")
+          .doc(currentUser.uid)
+          .set({
+            typing: false,
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true })
+          .catch(() => {});
+      }
+    });
 
 
     /*
