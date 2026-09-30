@@ -186,20 +186,39 @@
     .reply-button {
       border: none;
       background: transparent;
-      color: white;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.22);
-      font-size: 12px;
-      padding: 5px 9px;
-      margin-top: 7px;
-      border-radius: 8px;
+      color: #cbd5e1;
+      font-size: 11px;
+      padding: 3px 0;
+      margin-top: 5px;
       cursor: pointer;
-      opacity: 1;
+      opacity: 0.75;
     }
 
     .reply-button:hover {
       opacity: 1;
-      background: rgba(255,255,255,0.2);
+      text-decoration: underline;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .delete-button {
+      border: none;
+      background: transparent;
+      color: #fca5a5;
+      font-size: 11px;
+      padding: 3px 0;
+      margin-top: 5px;
+      cursor: pointer;
+      opacity: 0.75;
+    }
+
+    .delete-button:hover {
+      opacity: 1;
+      text-decoration: underline;
     }
 
     .reply-reference {
@@ -1736,7 +1755,21 @@
     }
 
 
-    /*
+          async function deleteMessage(messageId, message) {
+        if (!currentUser || message.sender !== currentUser.uid) return;
+
+        const confirmed = confirm("Delete this message?");
+        if (!confirmed) return;
+
+        try {
+          await db.collection("messages").doc(messageId).delete();
+        } catch (error) {
+          console.error("Delete message error:", error);
+          alert("Message could not be deleted. Please try again.");
+        }
+      }
+
+/*
       TYPING STATUS
     */
 
@@ -2015,7 +2048,10 @@
                   }
 
                   const replyButtonHTML = `
-                    <button class="reply-button" type="button">↩ Reply</button>
+                    <div class="message-actions">
+                      <button class="reply-button" type="button">↩ Reply</button>
+                      ${isMine ? `<button class="delete-button" type="button">🗑 Delete</button>` : ""}
+                    </div>
                   `;
 
                   /*
@@ -2111,6 +2147,16 @@
                     event.stopPropagation();
                     startReply(doc.id, message);
                   });
+
+                  const deleteButton =
+                    div.querySelector(".delete-button");
+
+                  if (deleteButton) {
+                    deleteButton.addEventListener("click", (event) => {
+                      event.stopPropagation();
+                      deleteMessage(doc.id, message);
+                    });
+                  }
 
                   const replyReference =
                     div.querySelector(".reply-reference");
