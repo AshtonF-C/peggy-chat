@@ -199,6 +199,28 @@
       text-decoration: underline;
     }
 
+    .message-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .delete-button {
+      border: none;
+      background: transparent;
+      color: #fca5a5;
+      font-size: 11px;
+      padding: 3px 0;
+      margin-top: 5px;
+      cursor: pointer;
+      opacity: 0.75;
+    }
+
+    .delete-button:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
     .reply-reference {
       padding: 7px 9px;
       margin-bottom: 7px;
@@ -548,58 +570,7 @@
         grid-template-columns: repeat(7, 1fr);
       }
     }
-  
-
-    /* CAMERA MODAL */
-    .camera-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 20px;
-    }
-    .camera-modal.show { display: flex; }
-    .camera-box {
-      width: min(700px, 100%);
-      background: #111827;
-      border-radius: 18px;
-      padding: 14px;
-      box-sizing: border-box;
-    }
-    .camera-video {
-      display: block;
-      width: 100%;
-      max-height: 70vh;
-      object-fit: cover;
-      background: #000;
-      border-radius: 12px;
-    }
-    .camera-controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 12px;
-    }
-    .camera-controls button {
-      border: none;
-      border-radius: 10px;
-      padding: 10px 16px;
-      font-size: 15px;
-      cursor: pointer;
-    }
-    .camera-capture { background: #2563eb; color: white; }
-    .camera-close { background: #374151; color: white; }
-    .camera-error {
-      color: #fca5a5;
-      text-align: center;
-      padding: 10px 4px 0;
-      font-size: 14px;
-      display: none;
-    }
-</style>
+  </style>
 </head>
 
 <body>
@@ -736,8 +707,8 @@
         class="photo-button"
         id="photoButton"
         type="button"
-        onclick="openPhotoCamera()"
-        title="Take or choose a photo"
+        onclick="openPhotoPicker()"
+        title="Send a photo"
       >
         📷
       </button>
@@ -781,20 +752,6 @@
 
   </div>
 
-
-
-
-  <!-- CAMERA MODAL -->
-  <div class="camera-modal" id="cameraModal">
-    <div class="camera-box">
-      <video class="camera-video" id="cameraVideo" autoplay playsinline></video>
-      <div class="camera-error" id="cameraError"></div>
-      <div class="camera-controls">
-        <button class="camera-close" type="button" onclick="closeCamera()">Cancel</button>
-        <button class="camera-capture" type="button" onclick="captureCameraPhoto()">📸 Take photo</button>
-      </div>
-    </div>
-  </div>
 
   <!-- FIREBASE -->
 
@@ -1357,84 +1314,12 @@
       OPEN PHONE / COMPUTER PHOTO PICKER
     */
 
-    let cameraStream = null;
-
-
-    async function openPhotoCamera() {
-
-      if (!currentUser) {
-        alert("Please enter the chat first.");
-        return;
-      }
-
-      const modal = document.getElementById("cameraModal");
-      const video = document.getElementById("cameraVideo");
-      const error = document.getElementById("cameraError");
-
-      error.textContent = "";
-      error.style.display = "none";
-      modal.classList.add("show");
-
-      try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false
-        });
-
-        video.srcObject = cameraStream;
-        await video.play();
-      } catch (cameraError) {
-        console.error("Camera error:", cameraError);
-        error.textContent = "Camera could not be opened. Check your browser camera permission, or use Cancel and choose a photo instead.";
-        error.style.display = "block";
-      }
-    }
-
-
-    function closeCamera() {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-        cameraStream = null;
-      }
-
-      const video = document.getElementById("cameraVideo");
-      video.srcObject = null;
-      document.getElementById("cameraModal").classList.remove("show");
-    }
-
-
-    async function captureCameraPhoto() {
-      const video = document.getElementById("cameraVideo");
-
-      if (!cameraStream || !video.videoWidth || !video.videoHeight) {
-        alert("The camera is not ready yet.");
-        return;
-      }
-
-      const canvas = document.createElement("canvas");
-      const maxWidth = 1600;
-      const scale = Math.min(1, maxWidth / video.videoWidth);
-      canvas.width = Math.round(video.videoWidth * scale);
-      canvas.height = Math.round(video.videoHeight * scale);
-
-      const context = canvas.getContext("2d");
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          alert("Could not capture the photo.");
-          return;
-        }
-
-        const file = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
-        closeCamera();
-        await sendPhotoFile(file);
-      }, "image/jpeg", 0.9);
-    }
-
-
     function openPhotoPicker() {
-      document.getElementById("photoInput").click();
+
+      document
+        .getElementById("photoInput")
+        .click();
+
     }
 
 
@@ -1444,25 +1329,31 @@
 
     async function handlePhotoSelected(event) {
 
-      const file = event.target.files[0];
+      const file =
+        event.target.files[0];
+
       if (!file) return;
 
-      await sendPhotoFile(file);
-
-      event.target.value = "";
-    }
-
-
-    async function sendPhotoFile(file) {
-
       if (!currentUser) {
-        alert("Please enter the chat first.");
+
+        alert(
+          "Please enter the chat first."
+        );
+
         return;
+
       }
 
       if (!file.type.startsWith("image/")) {
-        alert("Please choose an image.");
+
+        alert(
+          "Please choose an image."
+        );
+
+        event.target.value = "";
+
         return;
+
       }
 
       try {
@@ -1471,60 +1362,169 @@
         const replyTo = replyingTo;
         cancelReply();
 
-        const photoButton = document.getElementById("photoButton");
-        const uploadStatus = document.getElementById("uploadStatus");
+        const photoButton =
+          document.getElementById("photoButton");
+
+        const uploadStatus =
+          document.getElementById("uploadStatus");
 
         photoButton.classList.add("uploading");
-        uploadStatus.textContent = "Preparing photo...";
+
+        uploadStatus.textContent =
+          "Preparing photo...";
+
         uploadStatus.classList.add("show");
 
-        const compressedFile = await compressImage(file);
 
-        uploadStatus.textContent = "Uploading photo...";
+        /*
+          Resize/compress the image first.
+        */
 
-        const formData = new FormData();
-        formData.append("file", compressedFile);
-        formData.append("upload_preset", cloudinaryUploadPreset);
+        const compressedFile =
+          await compressImage(file);
 
-        const uploadResponse = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`,
-          { method: "POST", body: formData }
+
+        uploadStatus.textContent =
+          "Uploading photo...";
+
+
+        /*
+          Upload directly to Cloudinary.
+        */
+
+        const formData =
+          new FormData();
+
+        formData.append(
+          "file",
+          compressedFile
         );
 
+        formData.append(
+          "upload_preset",
+          cloudinaryUploadPreset
+        );
+
+
+        const uploadResponse =
+          await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`,
+            {
+              method: "POST",
+              body: formData
+            }
+          );
+
+
         if (!uploadResponse.ok) {
-          const errorText = await uploadResponse.text();
-          console.error("Cloudinary error:", errorText);
-          throw new Error("Photo upload failed.");
+
+          const errorText =
+            await uploadResponse.text();
+
+          console.error(
+            "Cloudinary error:",
+            errorText
+          );
+
+          throw new Error(
+            "Photo upload failed."
+          );
+
         }
 
-        const uploadResult = await uploadResponse.json();
-        const imageUrl = uploadResult.secure_url;
+
+        const uploadResult =
+          await uploadResponse.json();
+
+
+        const imageUrl =
+          uploadResult.secure_url;
+
+
+        /*
+          Save photo message to Firestore.
+        */
 
         await db.collection("messages").add({
+
           room: roomCode,
+
           text: "",
+
           imageUrl: imageUrl,
+
           type: "image",
+
           sender: currentUser.uid,
+
           senderName: username,
+
           ...(replyTo ? { replyTo: replyTo } : {}),
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          readBy: { [currentUser.uid]: true }
+
+          timestamp:
+            firebase.firestore.FieldValue.serverTimestamp(),
+
+          readBy: {
+
+            [currentUser.uid]: true
+
+          }
+
         });
 
-        sendNotification("📷 Sent you a photo");
 
-        uploadStatus.textContent = "Photo sent!";
-        setTimeout(() => uploadStatus.classList.remove("show"), 1200);
+        /*
+          Tell the other device that
+          a photo was sent.
+        */
+
+        sendNotification(
+          "📷 Sent you a photo"
+        );
+
+
+        uploadStatus.textContent =
+          "Photo sent!";
+
+        setTimeout(() => {
+
+          uploadStatus.classList.remove("show");
+
+        }, 1200);
+
 
       } catch (error) {
-        console.error("Photo upload error:", error);
-        alert("Photo could not be sent. Please try again.");
-        document.getElementById("uploadStatus").classList.remove("show");
-      } finally {
-        document.getElementById("photoButton").classList.remove("uploading");
+
+        console.error(
+          "Photo upload error:",
+          error
+        );
+
+        alert(
+          "Photo could not be sent. Please try again."
+        );
+
+        document
+          .getElementById("uploadStatus")
+          .classList.remove("show");
+
       }
+
+
+      document
+        .getElementById("photoButton")
+        .classList.remove("uploading");
+
+
+      /*
+        Reset file input so the same photo
+        can be selected again.
+      */
+
+      event.target.value = "";
+
     }
+
 
     /*
       COMPRESS PHOTO
@@ -1755,7 +1755,21 @@
     }
 
 
-    /*
+          async function deleteMessage(messageId, message) {
+        if (!currentUser || message.sender !== currentUser.uid) return;
+
+        const confirmed = confirm("Delete this message?");
+        if (!confirmed) return;
+
+        try {
+          await db.collection("messages").doc(messageId).delete();
+        } catch (error) {
+          console.error("Delete message error:", error);
+          alert("Message could not be deleted. Please try again.");
+        }
+      }
+
+/*
       TYPING STATUS
     */
 
@@ -2034,7 +2048,10 @@
                   }
 
                   const replyButtonHTML = `
-                    <button class="reply-button" type="button">↩ Reply</button>
+                    <div class="message-actions">
+                      <button class="reply-button" type="button">↩ Reply</button>
+                      ${isMine ? `<button class="delete-button" type="button">🗑 Delete</button>` : ""}
+                    </div>
                   `;
 
                   /*
@@ -2130,6 +2147,16 @@
                     event.stopPropagation();
                     startReply(doc.id, message);
                   });
+
+                  const deleteButton =
+                    div.querySelector(".delete-button");
+
+                  if (deleteButton) {
+                    deleteButton.addEventListener("click", (event) => {
+                      event.stopPropagation();
+                      deleteMessage(doc.id, message);
+                    });
+                  }
 
                   const replyReference =
                     div.querySelector(".reply-reference");
