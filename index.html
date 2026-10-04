@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -129,6 +128,8 @@
       padding: 0;
       cursor: pointer;
       font-family: inherit;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .logo:hover {
@@ -857,10 +858,6 @@
 
 <body>
 
-  <!-- ============================= -->
-  <!-- LOGIN SCREEN                  -->
-  <!-- ============================= -->
-
   <div id="loginScreen">
 
     <div class="login-box">
@@ -884,10 +881,6 @@
   </div>
 
 
-  <!-- ============================= -->
-  <!-- CHAT SCREEN                   -->
-  <!-- ============================= -->
-
   <div id="chatScreen">
 
     <div class="header">
@@ -898,7 +891,7 @@
           class="logo"
           id="logoButton"
           type="button"
-          onclick="handleLogoClick()"
+          onclick="handleLogoClick(event)"
           title="Back to menu"
         >
           💬 MateChat
@@ -1034,10 +1027,6 @@
   </div>
 
 
-  <!-- ============================= -->
-  <!-- DEVELOPER LOGIN               -->
-  <!-- ============================= -->
-
   <div id="developerLoginOverlay">
 
     <div class="developer-login-box">
@@ -1077,10 +1066,6 @@
   </div>
 
 
-  <!-- ============================= -->
-  <!-- DEVELOPER MENU                -->
-  <!-- ============================= -->
-
   <div id="developerMenuOverlay">
 
     <div class="developer-menu">
@@ -1101,8 +1086,6 @@
 
       <div class="developer-content">
 
-
-        <!-- USER CONTROLS -->
 
         <div class="developer-section open">
 
@@ -1148,8 +1131,6 @@
 
         </div>
 
-
-        <!-- MESSAGE TESTING -->
 
         <div class="developer-section">
 
@@ -1204,8 +1185,6 @@
         </div>
 
 
-        <!-- NOTIFICATIONS -->
-
         <div class="developer-section">
 
           <button
@@ -1247,8 +1226,6 @@
         </div>
 
 
-        <!-- PHOTO TESTING -->
-
         <div class="developer-section">
 
           <button
@@ -1282,8 +1259,6 @@
         </div>
 
 
-        <!-- APPEARANCE -->
-
         <div class="developer-section">
 
           <button
@@ -1312,8 +1287,6 @@
 
         </div>
 
-
-        <!-- DEBUG -->
 
         <div class="developer-section">
 
@@ -1389,8 +1362,6 @@
 
         </div>
 
-
-        <!-- EXPERIMENTAL -->
 
         <div class="developer-section">
 
@@ -1490,8 +1461,6 @@
   </div>
 
 
-  <!-- FIREBASE -->
-
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -1499,10 +1468,6 @@
 
 
   <script>
-
-    /* ============================= */
-    /* FIREBASE                      */
-    /* ============================= */
 
     const firebaseConfig = {
       apiKey: "AIzaSyCvx9Oo3xZxkyfGZ-Hm5Xj5os56fVoEX2o",
@@ -1526,14 +1491,8 @@
     const notificationServer =
       "https://peggy-chat.vercel.app/api/notify";
 
-
-    /* CLOUDINARY */
-
     const cloudinaryCloudName = "x7safyic";
     const cloudinaryUploadPreset = "matechat";
-
-
-    /* APP STATE */
 
     let currentUser = null;
     let username = "";
@@ -1552,10 +1511,6 @@
 
     let developerMessageCount = 0;
 
-
-    /* ============================= */
-    /* EXPERIMENTAL FEATURES         */
-    /* ============================= */
 
     const defaultExperimental = {
       typing: true,
@@ -1621,12 +1576,15 @@
               : "none";
         });
 
-      document
-        .getElementById("typingIndicator")
-        .classList.toggle(
+      const typingIndicator =
+        document.getElementById("typingIndicator");
+
+      if (typingIndicator) {
+        typingIndicator.classList.toggle(
           "experimental-disabled",
           !featureEnabled("typing")
         );
+      }
 
     }
 
@@ -1670,10 +1628,6 @@
 
     }
 
-
-    /* ============================= */
-    /* EMOJIS                        */
-    /* ============================= */
 
     const emojis = [
 
@@ -1806,10 +1760,6 @@
     );
 
 
-    /* ============================= */
-    /* FIREBASE LOGIN                */
-    /* ============================= */
-
     auth.signInAnonymously()
       .then((result) => {
 
@@ -1833,10 +1783,6 @@
 
       });
 
-
-    /* ============================= */
-    /* NOTIFICATIONS                  */
-    /* ============================= */
 
     async function setupNotifications() {
 
@@ -1922,24 +1868,48 @@
     });
 
 
-    /* ============================= */
-    /* LOGO / DEVELOPER UNLOCK       */
-    /* ============================= */
+    /*
+      =====================================================
+      FIXED 5-CLICK DEVELOPER UNLOCK
+      =====================================================
+    */
 
-    function handleLogoClick() {
+    function handleLogoClick(event) {
+
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
 
       developerTapCount++;
 
+      console.log(
+        "Developer logo clicks:",
+        developerTapCount
+      );
+
       clearTimeout(developerTapTimer);
 
+      /*
+        Give the user 2.5 seconds to complete
+        all five clicks.
+      */
       developerTapTimer =
         setTimeout(() => {
-          developerTapCount = 0;
-        }, 1800);
 
+          developerTapCount = 0;
+
+        }, 2500);
+
+
+      /*
+        Five clicks opens the developer login.
+      */
       if (developerTapCount >= 5) {
 
         developerTapCount = 0;
+
+        clearTimeout(developerTapTimer);
 
         openDeveloperLogin();
 
@@ -1947,7 +1917,13 @@
 
       }
 
-      returnToMenu();
+
+      /*
+        IMPORTANT:
+        Do NOT call returnToMenu() here.
+        That was interfering with the
+        multi-click sequence.
+      */
 
     }
 
@@ -2026,6 +2002,20 @@
 
 
     document
+      .getElementById("developerUsername")
+      .addEventListener(
+        "keydown",
+        function(event) {
+
+          if (event.key === "Enter") {
+            developerLogin();
+          }
+
+        }
+      );
+
+
+    document
       .getElementById("developerPassword")
       .addEventListener(
         "keydown",
@@ -2073,10 +2063,6 @@
 
     }
 
-
-    /* ============================= */
-    /* RETURN TO LOGIN               */
-    /* ============================= */
 
     function returnToMenu() {
 
@@ -2129,10 +2115,6 @@
 
     }
 
-
-    /* ============================= */
-    /* ENTER CHAT                    */
-    /* ============================= */
 
     function enterChat() {
 
@@ -2199,10 +2181,6 @@
     }
 
 
-    /* ============================= */
-    /* SEND MESSAGE                  */
-    /* ============================= */
-
     async function sendMessage() {
 
       const input =
@@ -2268,13 +2246,18 @@
     }
 
 
-    /* ============================= */
-    /* NOTIFICATION SERVER           */
-    /* ============================= */
-
     async function sendNotification(notificationText) {
 
       try {
+
+        const controller =
+          new AbortController();
+
+        const timeout =
+          setTimeout(
+            () => controller.abort(),
+            8000
+          );
 
         const response =
           await fetch(
@@ -2293,13 +2276,17 @@
                 senderUid: currentUser.uid,
                 text: notificationText
 
-              })
+              }),
+
+              signal: controller.signal
 
             }
           );
 
+        clearTimeout(timeout);
+
         const result =
-          await response.json();
+          await response.text();
 
         console.log(
           "Notification server:",
@@ -2317,10 +2304,6 @@
 
     }
 
-
-    /* ============================= */
-    /* PHOTO SYSTEM                  */
-    /* ============================= */
 
     function openPhotoPicker() {
 
@@ -2650,10 +2633,6 @@
     }
 
 
-    /* ============================= */
-    /* REPLIES                       */
-    /* ============================= */
-
     function startReply(messageId, message) {
 
       if (!featureEnabled("replies")) {
@@ -2748,10 +2727,6 @@
     }
 
 
-    /* ============================= */
-    /* DELETE MESSAGE                */
-    /* ============================= */
-
     async function deleteMessage(
       messageId,
       message
@@ -2797,10 +2772,6 @@
 
     }
 
-
-    /* ============================= */
-    /* TYPING                        */
-    /* ============================= */
 
     function updateTypingStatus() {
 
@@ -2997,10 +2968,6 @@
 
     }
 
-
-    /* ============================= */
-    /* LOAD MESSAGES                 */
-    /* ============================= */
 
     function listenForMessages() {
 
@@ -3490,10 +3457,6 @@
     }
 
 
-    /* ============================= */
-    /* PRESENCE                      */
-    /* ============================= */
-
     async function updatePresence() {
 
       if (
@@ -3540,10 +3503,6 @@
     }
 
 
-    /* ============================= */
-    /* ENTER KEY                    */
-    /* ============================= */
-
     document
       .getElementById("messageInput")
       .addEventListener(
@@ -3569,10 +3528,6 @@
         }
       );
 
-
-    /* ============================= */
-    /* DEVELOPER USER CONTROLS       */
-    /* ============================= */
 
     function devChangeName() {
 
@@ -3671,10 +3626,6 @@
 
     }
 
-
-    /* ============================= */
-    /* DEVELOPER MESSAGE TESTS       */
-    /* ============================= */
 
     async function devSendTestMessage() {
 
@@ -3830,8 +3781,16 @@
           )
           .get();
 
-      const batch =
-        db.batch();
+      if (snapshot.empty) {
+
+        alert("There are no messages.");
+
+        return;
+
+      }
+
+      let processed = 0;
+      let batch = db.batch();
 
       snapshot.forEach(doc => {
 
@@ -3843,9 +3802,19 @@
           }
         );
 
+        processed++;
+
+        if (processed === 450) {
+          batch.commit();
+          batch = db.batch();
+          processed = 0;
+        }
+
       });
 
-      await batch.commit();
+      if (processed > 0) {
+        await batch.commit();
+      }
 
       alert(
         "Messages marked as read."
@@ -3876,8 +3845,16 @@
           )
           .get();
 
-      const batch =
-        db.batch();
+      if (snapshot.empty) {
+
+        alert("There are no messages.");
+
+        return;
+
+      }
+
+      let processed = 0;
+      let batch = db.batch();
 
       snapshot.forEach(doc => {
 
@@ -3889,9 +3866,19 @@
           }
         );
 
+        processed++;
+
+        if (processed === 450) {
+          batch.commit();
+          batch = db.batch();
+          processed = 0;
+        }
+
       });
 
-      await batch.commit();
+      if (processed > 0) {
+        await batch.commit();
+      }
 
       alert(
         "Unread state tested."
@@ -3986,14 +3973,26 @@
 
         }
 
-        const batch =
-          db.batch();
+        let processed = 0;
+        let batch = db.batch();
 
         snapshot.forEach(doc => {
+
           batch.delete(doc.ref);
+
+          processed++;
+
+          if (processed === 450) {
+            batch.commit();
+            batch = db.batch();
+            processed = 0;
+          }
+
         });
 
-        await batch.commit();
+        if (processed > 0) {
+          await batch.commit();
+        }
 
         alert(
           "Your messages were deleted."
@@ -4012,10 +4011,6 @@
 
     }
 
-
-    /* ============================= */
-    /* DEVELOPER NOTIFICATION TESTS  */
-    /* ============================= */
 
     async function devTestBrowserNotification() {
 
@@ -4136,6 +4131,7 @@
         gain.connect(context.destination);
 
         oscillator.start();
+
         oscillator.stop(
           context.currentTime + 0.16
         );
@@ -4230,6 +4226,15 @@
 
       try {
 
+        const controller =
+          new AbortController();
+
+        const timeout =
+          setTimeout(
+            () => controller.abort(),
+            8000
+          );
+
         const response =
           await fetch(
             notificationServer,
@@ -4254,10 +4259,14 @@
                 text:
                   "Developer notification test"
 
-              })
+              }),
+
+              signal: controller.signal
 
             }
           );
+
+        clearTimeout(timeout);
 
         const result =
           await response.text();
@@ -4278,10 +4287,6 @@
 
     }
 
-
-    /* ============================= */
-    /* PHOTO TESTS                   */
-    /* ============================= */
 
     function devOpenPhotoPicker() {
 
@@ -4331,10 +4336,6 @@
 
     }
 
-
-    /* ============================= */
-    /* APPEARANCE                    */
-    /* ============================= */
 
     function toggleLightMode() {
 
@@ -4402,10 +4403,6 @@
 
     }
 
-
-    /* ============================= */
-    /* DEBUG INFORMATION             */
-    /* ============================= */
 
     function refreshDeveloperInfo() {
 
@@ -4494,10 +4491,6 @@
     }
 
 
-    /* ============================= */
-    /* PAGE CLEANUP                  */
-    /* ============================= */
-
     window.addEventListener(
       "beforeunload",
       () => {
@@ -4526,10 +4519,6 @@
       }
     );
 
-
-    /* ============================= */
-    /* HTML ESCAPING                 */
-    /* ============================= */
 
     function escapeHTML(text) {
 
@@ -4563,10 +4552,6 @@
     }
 
 
-    /* ============================= */
-    /* STARTUP                       */
-    /* ============================= */
-
     loadTheme();
     loadExperimentalCheckboxes();
     applyExperimentalFeatures();
@@ -4576,4 +4561,3 @@
 
 </body>
 </html>
-```
