@@ -117,6 +117,16 @@
     .logo {
       font-size: 24px;
       font-weight: bold;
+      border: none;
+      background: transparent;
+      color: white;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .logo:hover {
+      opacity: 0.8;
     }
 
     .room {
@@ -624,9 +634,15 @@
 
       <div class="header-left">
 
-        <div class="logo">
+        <button
+          class="logo"
+          id="logoButton"
+          type="button"
+          onclick="returnToMenu()"
+          title="Back to menu"
+        >
           💬 MateChat
-        </div>
+        </button>
 
         <div class="room" id="roomDisplay"></div>
 
@@ -1127,6 +1143,63 @@
       }
 
     });
+
+
+    /*
+      RETURN TO MENU
+    */
+
+    function returnToMenu() {
+
+      // Stop listening for messages and typing updates
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+        unsubscribeMessages = null;
+      }
+
+      if (unsubscribePresence) {
+        unsubscribePresence();
+        unsubscribePresence = null;
+      }
+
+      // Stop typing status
+      clearTimeout(typingTimeout);
+      clearTimeout(typingWriteTimeout);
+      isCurrentlyTyping = false;
+
+      // Hide the chat and show the login/menu screen
+      document.getElementById("chatScreen").style.display = "none";
+      document.getElementById("loginScreen").style.display = "flex";
+
+      // Clear the current chat
+      document.getElementById("messages").innerHTML = `
+        <div class="empty" id="emptyMessage">
+          No messages yet.<br>
+          Send the first message!
+        </div>
+      `;
+
+      // Clear the message composer
+      document.getElementById("messageInput").value = "";
+      document.getElementById("photoInput").value = "";
+      document.getElementById("roomDisplay").textContent = "";
+      document.getElementById("typingIndicator").classList.remove("show");
+      document.getElementById("emojiPicker").classList.remove("show");
+
+      // Cancel any active reply
+      cancelReply();
+
+      // Clear the login fields so a new name/room can be entered
+      document.getElementById("nameInput").value = "";
+      document.getElementById("roomInput").value = "";
+      document.getElementById("error").textContent = "";
+
+      // Reset the current room/user details
+      username = "";
+      roomCode = "";
+
+      window.scrollTo(0, 0);
+    }
 
 
     /*
