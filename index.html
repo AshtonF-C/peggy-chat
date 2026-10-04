@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +19,11 @@
       color: white;
       height: 100vh;
       overflow: hidden;
+    }
+
+    body.light-mode {
+      background: #e5e7eb;
+      color: #111827;
     }
 
     .app {
@@ -193,10 +199,10 @@
       line-height: 1.35;
     }
 
-    .reply-button {
+    .reply-button,
+    .delete-button {
       border: none;
       background: transparent;
-      color: #cbd5e1;
       font-size: 11px;
       padding: 3px 0;
       margin-top: 5px;
@@ -204,7 +210,16 @@
       opacity: 0.75;
     }
 
-    .reply-button:hover {
+    .reply-button {
+      color: #cbd5e1;
+    }
+
+    .delete-button {
+      color: #fca5a5;
+    }
+
+    .reply-button:hover,
+    .delete-button:hover {
       opacity: 1;
       text-decoration: underline;
     }
@@ -213,22 +228,6 @@
       display: flex;
       gap: 10px;
       align-items: center;
-    }
-
-    .delete-button {
-      border: none;
-      background: transparent;
-      color: #fca5a5;
-      font-size: 11px;
-      padding: 3px 0;
-      margin-top: 5px;
-      cursor: pointer;
-      opacity: 0.75;
-    }
-
-    .delete-button:hover {
-      opacity: 1;
-      text-decoration: underline;
     }
 
     .reply-reference {
@@ -306,10 +305,6 @@
       cursor: pointer;
     }
 
-    .cancel-reply:hover {
-      background: #4b5563;
-    }
-
     .typing-indicator {
       display: none;
       padding: 0 16px 6px;
@@ -348,6 +343,7 @@
         transform: translateY(0);
         opacity: 0.5;
       }
+
       30% {
         transform: translateY(-4px);
         opacity: 1;
@@ -360,8 +356,6 @@
       text-align: right;
       margin-top: 4px;
     }
-
-    /* PHOTO MESSAGES */
 
     .message-image {
       display: block;
@@ -384,14 +378,6 @@
       background: #000;
     }
 
-    .photo-loading {
-      padding: 10px;
-      color: #d1d5db;
-      font-size: 14px;
-    }
-
-    /* COMPOSER */
-
     .composer {
       position: relative;
       display: flex;
@@ -413,10 +399,6 @@
       font-size: 16px;
     }
 
-    .composer input[type="text"]::placeholder {
-      color: #9ca3af;
-    }
-
     .emoji-button,
     .photo-button {
       width: 48px;
@@ -428,16 +410,6 @@
       color: white;
       font-size: 23px;
       cursor: pointer;
-    }
-
-    .emoji-button:hover,
-    .photo-button:hover {
-      background: #4b5563;
-    }
-
-    .photo-button.uploading {
-      opacity: 0.5;
-      pointer-events: none;
     }
 
     .send-button {
@@ -452,11 +424,10 @@
       cursor: pointer;
     }
 
-    .send-button:hover {
-      background: #2563eb;
+    .photo-button.uploading {
+      opacity: 0.5;
+      pointer-events: none;
     }
-
-    /* EMOJI PICKER */
 
     .emoji-picker {
       display: none;
@@ -495,10 +466,6 @@
       line-height: 1;
     }
 
-    .emoji-item:hover {
-      background: #374151;
-    }
-
     .emoji-title {
       color: #9ca3af;
       font-size: 12px;
@@ -510,8 +477,6 @@
       color: #9ca3af;
       margin: auto;
     }
-
-    /* UPLOAD STATUS */
 
     .upload-status {
       display: none;
@@ -530,48 +495,340 @@
       display: block;
     }
 
-    @media (max-width: 600px) {
+    /* ============================= */
+    /* DEVELOPER LOGIN               */
+    /* ============================= */
 
+    #developerLoginOverlay,
+    #developerMenuOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      backdrop-filter: blur(5px);
+    }
+
+    .developer-login-box {
+      width: 100%;
+      max-width: 390px;
+      background: #1f2937;
+      border: 1px solid #4b5563;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 20px 70px rgba(0,0,0,0.6);
+    }
+
+    .developer-login-box h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .developer-login-box input {
+      width: 100%;
+      padding: 13px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .developer-login-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .developer-login-buttons button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+      background: #3b82f6;
+    }
+
+    .developer-login-buttons button:last-child {
+      background: #4b5563;
+    }
+
+    #developerLoginError {
+      color: #fca5a5;
+      text-align: center;
+      min-height: 20px;
+      margin-top: 8px;
+    }
+
+    /* ============================= */
+    /* DEVELOPER MENU                */
+    /* ============================= */
+
+    #developerMenuOverlay {
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .developer-menu {
+      width: 100%;
+      max-width: 650px;
+      height: 100%;
+      max-height: 95vh;
+      margin: auto;
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.7);
+    }
+
+    .developer-header {
+      padding: 18px;
+      background: #0b1220;
+      border-bottom: 1px solid #374151;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .developer-header h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .developer-close {
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: 50%;
+      background: #374151;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .developer-content {
+      overflow-y: auto;
+      padding: 12px;
+      flex: 1;
+    }
+
+    .developer-section {
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .developer-section-header {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      background: transparent;
+      color: white;
+      text-align: left;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .developer-section-header:hover {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .developer-section-content {
+      display: none;
+      padding: 0 12px 12px;
+    }
+
+    .developer-section.open .developer-section-content {
+      display: block;
+    }
+
+    .developer-section-arrow {
+      transition: transform 0.2s;
+    }
+
+    .developer-section.open .developer-section-arrow {
+      transform: rotate(180deg);
+    }
+
+    .dev-button {
+      width: 100%;
+      padding: 11px 12px;
+      margin-top: 7px;
+      border: none;
+      border-radius: 9px;
+      background: #374151;
+      color: white;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .dev-button:hover {
+      background: #4b5563;
+    }
+
+    .dev-button.danger {
+      background: #7f1d1d;
+    }
+
+    .dev-button.danger:hover {
+      background: #991b1b;
+    }
+
+    .dev-button.success {
+      background: #166534;
+    }
+
+    .dev-info {
+      background: #111827;
+      border-radius: 9px;
+      padding: 10px;
+      margin-top: 7px;
+      font-size: 12px;
+      color: #d1d5db;
+      word-break: break-word;
+    }
+
+    .dev-info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 4px 0;
+      border-bottom: 1px solid #374151;
+    }
+
+    .dev-info-row:last-child {
+      border-bottom: none;
+    }
+
+    .dev-info-label {
+      color: #9ca3af;
+    }
+
+    .dev-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      margin-top: 7px;
+      background: #111827;
+      border-radius: 9px;
+      font-size: 14px;
+    }
+
+    .dev-toggle input {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .dev-input {
+      width: 100%;
+      padding: 11px;
+      margin-top: 7px;
+      border: none;
+      border-radius: 9px;
+      outline: none;
+      background: #111827;
+      color: white;
+    }
+
+    .dev-status {
+      margin-top: 7px;
+      padding: 9px;
+      border-radius: 8px;
+      background: #111827;
+      color: #86efac;
+      font-size: 12px;
+    }
+
+    body.light-mode .developer-menu,
+    body.light-mode .developer-login-box {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    body.light-mode .developer-header {
+      background: #e5e7eb;
+    }
+
+    body.light-mode .developer-section {
+      background: white;
+      border-color: #d1d5db;
+    }
+
+    body.light-mode .developer-section-header {
+      color: #111827;
+    }
+
+    body.light-mode .dev-info,
+    body.light-mode .dev-toggle,
+    body.light-mode .dev-input {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    /* ============================= */
+    /* MEDIA MODAL                   */
+    /* ============================= */
+
+    #mediaTestModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 11000;
+      background: rgba(0,0,0,0.8);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .media-test-box {
+      width: 100%;
+      max-width: 450px;
+      background: #1f2937;
+      padding: 20px;
+      border-radius: 15px;
+    }
+
+    @media (max-width: 600px) {
       body {
         height: 100dvh;
         min-height: 100dvh;
-        overflow: hidden;
       }
 
       #chatScreen {
         height: 100dvh;
-        min-height: 0;
       }
 
       .header {
         height: 62px;
-        flex-shrink: 0;
       }
 
       .messages {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
         padding: 12px;
       }
 
       .composer {
-        flex-shrink: 0;
-        position: sticky;
-        bottom: 0;
         padding: 10px;
       }
 
       .message {
         max-width: 85%;
-      }
-
-      .reply-preview {
-        padding: 8px 10px;
-      }
-
-      .typing-indicator {
-        padding-left: 12px;
       }
 
       .message-image {
@@ -586,14 +843,23 @@
         max-height: 260px;
       }
 
-      .emoji-grid {
-        grid-template-columns: repeat(7, 1fr);
+      .developer-menu {
+        max-height: 100%;
+        border-radius: 0;
+      }
+
+      #developerMenuOverlay {
+        padding: 0;
       }
     }
   </style>
 </head>
 
 <body>
+
+  <!-- ============================= -->
+  <!-- LOGIN SCREEN                  -->
+  <!-- ============================= -->
 
   <div id="loginScreen">
 
@@ -603,19 +869,9 @@
 
       <p>Enter your name and your private room code.</p>
 
-      <input
-        id="nameInput"
-        type="text"
-        maxlength="20"
-        placeholder="Your name"
-      >
+      <input id="nameInput" type="text" maxlength="20" placeholder="Your name">
 
-      <input
-        id="roomInput"
-        type="text"
-        maxlength="30"
-        placeholder="Room code"
-      >
+      <input id="roomInput" type="text" maxlength="30" placeholder="Room code">
 
       <button class="main-button" onclick="enterChat()">
         Enter Chat
@@ -628,6 +884,10 @@
   </div>
 
 
+  <!-- ============================= -->
+  <!-- CHAT SCREEN                   -->
+  <!-- ============================= -->
+
   <div id="chatScreen">
 
     <div class="header">
@@ -638,7 +898,7 @@
           class="logo"
           id="logoButton"
           type="button"
-          onclick="returnToMenu()"
+          onclick="handleLogoClick()"
           title="Back to menu"
         >
           💬 MateChat
@@ -673,50 +933,53 @@
 
     <div id="typingIndicator" class="typing-indicator">
       <div class="typing-dots">
-        <span></span><span></span><span></span>
+        <span></span>
+        <span></span>
+        <span></span>
       </div>
     </div>
 
+
     <div id="replyPreview" class="reply-preview">
+
       <div class="reply-preview-content">
-        <div id="replyPreviewTitle" class="reply-preview-title">Replying</div>
+
+        <div id="replyPreviewTitle" class="reply-preview-title">
+          Replying
+        </div>
+
         <div id="replyPreviewText" class="reply-preview-text"></div>
+
       </div>
-      <button class="cancel-reply" type="button" onclick="cancelReply()" title="Cancel reply">×</button>
+
+      <button
+        class="cancel-reply"
+        type="button"
+        onclick="cancelReply()"
+      >
+        ×
+      </button>
+
     </div>
+
 
     <div class="composer">
 
-      <!-- UPLOAD STATUS -->
-
-      <div
-        class="upload-status"
-        id="uploadStatus"
-      >
+      <div class="upload-status" id="uploadStatus">
         Uploading photo...
       </div>
 
 
-      <!-- EMOJI PICKER -->
-
-      <div
-        class="emoji-picker"
-        id="emojiPicker"
-      >
+      <div class="emoji-picker" id="emojiPicker">
 
         <div class="emoji-title">
           Choose an emoji
         </div>
 
-        <div
-          class="emoji-grid"
-          id="emojiGrid"
-        ></div>
+        <div class="emoji-grid" id="emojiGrid"></div>
 
       </div>
 
-
-      <!-- PHOTO FILE INPUT -->
 
       <input
         id="photoInput"
@@ -726,8 +989,6 @@
         onchange="handlePhotoSelected(event)"
       >
 
-
-      <!-- PHOTO BUTTON -->
 
       <button
         class="photo-button"
@@ -740,8 +1001,6 @@
       </button>
 
 
-      <!-- EMOJI BUTTON -->
-
       <button
         class="emoji-button"
         id="emojiButton"
@@ -753,8 +1012,6 @@
       </button>
 
 
-      <!-- MESSAGE INPUT -->
-
       <input
         id="messageInput"
         type="text"
@@ -763,8 +1020,6 @@
         autocomplete="off"
       >
 
-
-      <!-- SEND BUTTON -->
 
       <button
         class="send-button"
@@ -779,18 +1034,475 @@
   </div>
 
 
+  <!-- ============================= -->
+  <!-- DEVELOPER LOGIN               -->
+  <!-- ============================= -->
+
+  <div id="developerLoginOverlay">
+
+    <div class="developer-login-box">
+
+      <h2>🛠️ Developer Login</h2>
+
+      <input
+        id="developerUsername"
+        type="text"
+        placeholder="Username"
+        autocomplete="off"
+      >
+
+      <input
+        id="developerPassword"
+        type="password"
+        placeholder="Password"
+        autocomplete="off"
+      >
+
+      <div class="developer-login-buttons">
+
+        <button onclick="developerLogin()">
+          Login
+        </button>
+
+        <button onclick="closeDeveloperLogin()">
+          Cancel
+        </button>
+
+      </div>
+
+      <div id="developerLoginError"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- DEVELOPER MENU                -->
+  <!-- ============================= -->
+
+  <div id="developerMenuOverlay">
+
+    <div class="developer-menu">
+
+      <div class="developer-header">
+
+        <h2>🛠️ Developer Menu</h2>
+
+        <button
+          class="developer-close"
+          onclick="closeDeveloperMenu()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="developer-content">
+
+
+        <!-- USER CONTROLS -->
+
+        <div class="developer-section open">
+
+          <button
+            class="developer-section-header"
+            onclick="toggleDeveloperSection(this)"
+          >
+            👤 User Controls
+            <span class="developer-section-arrow">▼</span>
+          </button>
+
+          <div class="developer-section-content">
+
+            <div class="dev-info">
+              Current username:
+              <strong id="devCurrentUsername">-</strong>
+            </div>
+
+            <input
+              id="devNameInput"
+              class="dev-input"
+              maxlength="20"
+              placeholder="New displayed name"
+            >
+
+            <button class="dev-button" onclick="devChangeName()">
+              Change displayed name
+            </button>
+
+            <button class="dev-button" onclick="devShowSession()">
+              Show current session
+            </button>
+
+            <button class="dev-button" onclick="devClearLoginFields()">
+              Clear login fields
+            </button>
+
+            <button class="dev-button danger" onclick="devReturnToLogin()">
+              Return to login screen
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- MESSAGE TESTING -->
+
+        <div class="developer-section">
+
+          <button
+            class="developer-section-header"
+            onclick="toggleDeveloperSection(this)"
+          >
+            💬 Message Testing
+            <span class="developer-section-arrow">▼</span>
+          </button>
+
+          <div class="developer-section-content">
+
+            <input
+              id="devTestMessage"
+              class="dev-input"
+              maxlength="1000"
+              placeholder="Test message"
+              value="This is a developer test message."
+            >
+
+            <button class="dev-button" onclick="devSendTestMessage()">
+              Send test message
+            </button>
+
+            <button class="dev-button" onclick="devTestReply()">
+              Test reply system
+            </button>
+
+            <button class="dev-button" onclick="devTestTyping()">
+              Test typing indicator
+            </button>
+
+            <button class="dev-button" onclick="devMarkMessagesRead()">
+              Mark messages as read
+            </button>
+
+            <button class="dev-button" onclick="devMarkMessagesUnread()">
+              Test unread state
+            </button>
+
+            <button class="dev-button" onclick="devHighlightLastMessage()">
+              Highlight last message
+            </button>
+
+            <button class="dev-button danger" onclick="devDeleteOwnMessages()">
+              Delete my messages
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- NOTIFICATIONS -->
+
+        <div class="developer-section">
+
+          <button
+            class="developer-section-header"
+            onclick="toggleDeveloperSection(this)"
+          >
+            🔔 Notification Testing
+            <span class="developer-section-arrow">▼</span>
+          </button>
+
+          <div class="developer-section-content">
+
+            <button class="dev-button" onclick="devTestBrowserNotification()">
+              Test browser notification
+            </button>
+
+            <button class="dev-button" onclick="devRequestNotificationPermission()">
+              Request notification permission
+            </button>
+
+            <button class="dev-button" onclick="devTestSound()">
+              🔊 Test sound
+            </button>
+
+            <button class="dev-button" onclick="devTestVibration()">
+              📳 Test vibration
+            </button>
+
+            <button class="dev-button" onclick="devTestNotificationServer()">
+              Test notification server
+            </button>
+
+            <div class="dev-status" id="devNotificationStatus">
+              Notification status: checking...
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PHOTO TESTING -->
+
+        <div class="developer-section">
+
+          <button
+            class="developer-section-header"
+            onclick="toggleDeveloperSection(this)"
+          >
+            📷 Photo Testing
+            <span class="developer-section-arrow">▼</span>
+          </button>
+
+          <div class="developer-section-content">
+
+            <button class="dev-button" onclick="devOpenPhotoPicker()">
+              Open photo/video picker
+            </button>
+
+            <button class="dev-button" onclick="devShowCloudinaryInfo()">
+              Show photo upload configuration
+            </button>
+
+            <button class="dev-button" onclick="devTestPhotoButton()">
+              Test photo button
+            </button>
+
+            <div class="dev-info" id="devPhotoStatus">
+              Photo system ready.
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- APPEARANCE -->
+
+        <div class="developer-section">
+
+          <button
+            class="developer-section-header"
+            onclick="toggleDeveloperSection(this)"
+          >
+            🎨 Appearance
+            <span class="developer-section-arrow">▼</span>
+          </button>
+
+          <div class="developer-section-content">
+
+            <button class="dev-button" onclick="toggleLightMode()">
+              Toggle dark/light mode
+            </button>
+
+            <button class="dev-button" onclick="resetAppearance()">
+              Reset appearance
+            </button>
+
+            <div class="dev-status" id="devThemeStatus">
+              Theme: Dark
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- DEBUG -->
+
+        <div class="developer-section">
+
+          <button
+            class="developer-section-header"
+            onclick="toggleDeveloperSection(this)"
+          >
+            📊 Debug Information
+            <span class="developer-section-arrow">▼</span>
+          </button>
+
+          <div class="developer-section-content">
+
+            <div class="dev-info">
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">App</span>
+                <span>MateChat</span>
+              </div>
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">Version</span>
+                <span id="devVersion">1.0 Developer</span>
+              </div>
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">Firebase</span>
+                <span id="devFirebaseStatus">Checking...</span>
+              </div>
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">User ID</span>
+                <span id="devUserId">-</span>
+              </div>
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">Username</span>
+                <span id="devUsername">-</span>
+              </div>
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">Room</span>
+                <span id="devRoom">-</span>
+              </div>
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">Messages loaded</span>
+                <span id="devMessageCount">0</span>
+              </div>
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">Online status</span>
+                <span id="devOnlineStatus">-</span>
+              </div>
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">Notifications</span>
+                <span id="devNotificationPermission">-</span>
+              </div>
+
+              <div class="dev-info-row">
+                <span class="dev-info-label">Browser</span>
+                <span id="devBrowser">-</span>
+              </div>
+
+            </div>
+
+            <button class="dev-button" onclick="refreshDeveloperInfo()">
+              Refresh debug information
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- EXPERIMENTAL -->
+
+        <div class="developer-section">
+
+          <button
+            class="developer-section-header"
+            onclick="toggleDeveloperSection(this)"
+          >
+            🧪 Experimental Features
+            <span class="developer-section-arrow">▼</span>
+          </button>
+
+          <div class="developer-section-content">
+
+            <label class="dev-toggle">
+              <span>Typing indicator</span>
+              <input
+                id="toggleTyping"
+                type="checkbox"
+                checked
+                onchange="setExperimentalFeature('typing', this.checked)"
+              >
+            </label>
+
+            <label class="dev-toggle">
+              <span>Read receipts</span>
+              <input
+                id="toggleReadReceipts"
+                type="checkbox"
+                checked
+                onchange="setExperimentalFeature('readReceipts', this.checked)"
+              >
+            </label>
+
+            <label class="dev-toggle">
+              <span>Message replies</span>
+              <input
+                id="toggleReplies"
+                type="checkbox"
+                checked
+                onchange="setExperimentalFeature('replies', this.checked)"
+              >
+            </label>
+
+            <label class="dev-toggle">
+              <span>Message deletion</span>
+              <input
+                id="toggleDeletion"
+                type="checkbox"
+                checked
+                onchange="setExperimentalFeature('deletion', this.checked)"
+              >
+            </label>
+
+            <label class="dev-toggle">
+              <span>Photo messages</span>
+              <input
+                id="togglePhotos"
+                type="checkbox"
+                checked
+                onchange="setExperimentalFeature('photos', this.checked)"
+              >
+            </label>
+
+            <label class="dev-toggle">
+              <span>Sound effects</span>
+              <input
+                id="toggleSound"
+                type="checkbox"
+                checked
+                onchange="setExperimentalFeature('sound', this.checked)"
+              >
+            </label>
+
+            <label class="dev-toggle">
+              <span>Vibration</span>
+              <input
+                id="toggleVibration"
+                type="checkbox"
+                checked
+                onchange="setExperimentalFeature('vibration', this.checked)"
+              >
+            </label>
+
+            <button class="dev-button" onclick="resetExperimentalFeatures()">
+              Reset experimental features
+            </button>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+  </div>
+
+
   <!-- FIREBASE -->
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
 
 
   <script>
+
+    /* ============================= */
+    /* FIREBASE                      */
+    /* ============================= */
 
     const firebaseConfig = {
       apiKey: "AIzaSyCvx9Oo3xZxkyfGZ-Hm5Xj5os56fVoEX2o",
@@ -802,35 +1514,26 @@
       measurementId: "G-94E71PCH6J"
     };
 
-
     firebase.initializeApp(firebaseConfig);
 
-
     const auth = firebase.auth();
-
     const db = firebase.firestore();
-
     const messaging = firebase.messaging();
-
 
     const vapidKey =
       "BMomp_XJjMiIV5crL8xF8vBHZ5XFoe37OKEeti8B4GKBeIZMmYne39RqCEyV8RbWrmUKwOJkEDvbsVWNZ8b3kuA";
-
 
     const notificationServer =
       "https://peggy-chat.vercel.app/api/notify";
 
 
-    /*
-      CLOUDINARY
-    */
+    /* CLOUDINARY */
 
-    const cloudinaryCloudName =
-      "x7safyic";
+    const cloudinaryCloudName = "x7safyic";
+    const cloudinaryUploadPreset = "matechat";
 
-    const cloudinaryUploadPreset =
-      "matechat";
 
+    /* APP STATE */
 
     let currentUser = null;
     let username = "";
@@ -841,11 +1544,136 @@
     let typingWriteTimeout = null;
     let isCurrentlyTyping = false;
     let replyingTo = null;
+    let presenceInterval = null;
+
+    let developerTapCount = 0;
+    let developerTapTimer = null;
+    let developerAuthenticated = false;
+
+    let developerMessageCount = 0;
 
 
-    /*
-      EMOJI LIST
-    */
+    /* ============================= */
+    /* EXPERIMENTAL FEATURES         */
+    /* ============================= */
+
+    const defaultExperimental = {
+      typing: true,
+      readReceipts: true,
+      replies: true,
+      deletion: true,
+      photos: true,
+      sound: true,
+      vibration: true
+    };
+
+    let experimentalFeatures =
+      JSON.parse(
+        localStorage.getItem("matechatExperimental")
+        || JSON.stringify(defaultExperimental)
+      );
+
+
+    function featureEnabled(name) {
+      return experimentalFeatures[name] !== false;
+    }
+
+
+    function setExperimentalFeature(name, value) {
+
+      experimentalFeatures[name] = value;
+
+      localStorage.setItem(
+        "matechatExperimental",
+        JSON.stringify(experimentalFeatures)
+      );
+
+      applyExperimentalFeatures();
+
+    }
+
+
+    function applyExperimentalFeatures() {
+
+      const photoButton =
+        document.getElementById("photoButton");
+
+      if (photoButton) {
+        photoButton.style.display =
+          featureEnabled("photos")
+            ? ""
+            : "none";
+      }
+
+      document.querySelectorAll(".reply-button")
+        .forEach(button => {
+          button.style.display =
+            featureEnabled("replies")
+              ? ""
+              : "none";
+        });
+
+      document.querySelectorAll(".delete-button")
+        .forEach(button => {
+          button.style.display =
+            featureEnabled("deletion")
+              ? ""
+              : "none";
+        });
+
+      document
+        .getElementById("typingIndicator")
+        .classList.toggle(
+          "experimental-disabled",
+          !featureEnabled("typing")
+        );
+
+    }
+
+
+    function resetExperimentalFeatures() {
+
+      experimentalFeatures =
+        {...defaultExperimental};
+
+      localStorage.setItem(
+        "matechatExperimental",
+        JSON.stringify(experimentalFeatures)
+      );
+
+      loadExperimentalCheckboxes();
+      applyExperimentalFeatures();
+
+      alert("Experimental features reset.");
+
+    }
+
+
+    function loadExperimentalCheckboxes() {
+
+      Object.keys(defaultExperimental)
+        .forEach(name => {
+
+          const checkbox =
+            document.getElementById(
+              "toggle" +
+              name.charAt(0).toUpperCase() +
+              name.slice(1)
+            );
+
+          if (checkbox) {
+            checkbox.checked =
+              featureEnabled(name);
+          }
+
+        });
+
+    }
+
+
+    /* ============================= */
+    /* EMOJIS                        */
+    /* ============================= */
 
     const emojis = [
 
@@ -888,10 +1716,6 @@
     ];
 
 
-    /*
-      CREATE EMOJI BUTTONS
-    */
-
     const emojiGrid =
       document.getElementById("emojiGrid");
 
@@ -902,11 +1726,8 @@
         document.createElement("button");
 
       button.type = "button";
-
       button.className = "emoji-item";
-
       button.textContent = emoji;
-
       button.title = emoji;
 
       button.addEventListener(
@@ -919,23 +1740,14 @@
     });
 
 
-    /*
-      OPEN / CLOSE EMOJI PICKER
-    */
-
     function toggleEmojiPicker() {
 
-      const picker =
-        document.getElementById("emojiPicker");
-
-      picker.classList.toggle("show");
+      document
+        .getElementById("emojiPicker")
+        .classList.toggle("show");
 
     }
 
-
-    /*
-      INSERT EMOJI
-    */
 
     function insertEmoji(emoji) {
 
@@ -948,26 +1760,19 @@
       const end =
         input.selectionEnd;
 
-      const before =
-        input.value.substring(0, start);
-
-      const after =
+      input.value =
+        input.value.substring(0, start) +
+        emoji +
         input.value.substring(end);
 
-      input.value =
-        before +
-        emoji +
-        after;
-
-      const newCursorPosition =
-        start +
-        emoji.length;
+      const newPosition =
+        start + emoji.length;
 
       input.focus();
 
       input.setSelectionRange(
-        newCursorPosition,
-        newCursorPosition
+        newPosition,
+        newPosition
       );
 
       document
@@ -976,10 +1781,6 @@
 
     }
 
-
-    /*
-      CLOSE EMOJI PICKER
-    */
 
     document.addEventListener(
       "click",
@@ -1005,9 +1806,9 @@
     );
 
 
-    /*
-      FIREBASE LOGIN
-    */
+    /* ============================= */
+    /* FIREBASE LOGIN                */
+    /* ============================= */
 
     auth.signInAnonymously()
       .then((result) => {
@@ -1019,46 +1820,37 @@
           currentUser.uid
         );
 
+        refreshDeveloperInfo();
+
       })
       .catch((error) => {
 
         console.error(error);
 
         document.getElementById("error").textContent =
-          "Firebase sign-in failed: " + error.message;
+          "Firebase sign-in failed: " +
+          error.message;
 
       });
 
 
-    /*
-      NOTIFICATIONS
-    */
+    /* ============================= */
+    /* NOTIFICATIONS                  */
+    /* ============================= */
 
     async function setupNotifications() {
 
       try {
 
         if (!("Notification" in window)) {
-
-          console.log(
-            "This browser does not support notifications."
-          );
-
           return;
-
         }
 
         const permission =
           await Notification.requestPermission();
 
         if (permission !== "granted") {
-
-          console.log(
-            "Notification permission was not granted."
-          );
-
           return;
-
         }
 
         const registration =
@@ -1068,28 +1860,19 @@
 
         const token =
           await messaging.getToken({
-
             vapidKey: vapidKey,
-
-            serviceWorkerRegistration:
-              registration
-
+            serviceWorkerRegistration: registration
           });
 
         if (token) {
 
-          console.log(
-            "Notification token created."
-          );
-
-          await db.collection("notificationTokens")
+          await db
+            .collection("notificationTokens")
             .doc(currentUser.uid)
             .set({
 
               token: token,
-
               username: username,
-
               room: roomCode,
 
               updatedAt:
@@ -1097,11 +1880,9 @@
 
             });
 
-          console.log(
-            "Notification setup complete."
-          );
-
         }
+
+        refreshDeveloperInfo();
 
       } catch (error) {
 
@@ -1114,10 +1895,6 @@
 
     }
 
-
-    /*
-      FOREGROUND NOTIFICATIONS
-    */
 
     messaging.onMessage((payload) => {
 
@@ -1145,13 +1922,164 @@
     });
 
 
-    /*
-      RETURN TO MENU
-    */
+    /* ============================= */
+    /* LOGO / DEVELOPER UNLOCK       */
+    /* ============================= */
+
+    function handleLogoClick() {
+
+      developerTapCount++;
+
+      clearTimeout(developerTapTimer);
+
+      developerTapTimer =
+        setTimeout(() => {
+          developerTapCount = 0;
+        }, 1800);
+
+      if (developerTapCount >= 5) {
+
+        developerTapCount = 0;
+
+        openDeveloperLogin();
+
+        return;
+
+      }
+
+      returnToMenu();
+
+    }
+
+
+    function openDeveloperLogin() {
+
+      document
+        .getElementById("developerLoginOverlay")
+        .style.display = "flex";
+
+      document
+        .getElementById("developerUsername")
+        .value = "";
+
+      document
+        .getElementById("developerPassword")
+        .value = "";
+
+      document
+        .getElementById("developerLoginError")
+        .textContent = "";
+
+      setTimeout(() => {
+
+        document
+          .getElementById("developerUsername")
+          .focus();
+
+      }, 100);
+
+    }
+
+
+    function closeDeveloperLogin() {
+
+      document
+        .getElementById("developerLoginOverlay")
+        .style.display = "none";
+
+    }
+
+
+    function developerLogin() {
+
+      const user =
+        document
+          .getElementById("developerUsername")
+          .value;
+
+      const password =
+        document
+          .getElementById("developerPassword")
+          .value;
+
+      if (
+        user === "developer" &&
+        password === "12654978"
+      ) {
+
+        developerAuthenticated = true;
+
+        closeDeveloperLogin();
+
+        openDeveloperMenu();
+
+        return;
+
+      }
+
+      document
+        .getElementById("developerLoginError")
+        .textContent =
+          "Incorrect username or password.";
+
+    }
+
+
+    document
+      .getElementById("developerPassword")
+      .addEventListener(
+        "keydown",
+        function(event) {
+
+          if (event.key === "Enter") {
+            developerLogin();
+          }
+
+        }
+      );
+
+
+    function openDeveloperMenu() {
+
+      if (!developerAuthenticated) {
+        return;
+      }
+
+      document
+        .getElementById("developerMenuOverlay")
+        .style.display = "flex";
+
+      loadExperimentalCheckboxes();
+      refreshDeveloperInfo();
+
+    }
+
+
+    function closeDeveloperMenu() {
+
+      document
+        .getElementById("developerMenuOverlay")
+        .style.display = "none";
+
+    }
+
+
+    function toggleDeveloperSection(button) {
+
+      button
+        .parentElement
+        .classList
+        .toggle("open");
+
+    }
+
+
+    /* ============================= */
+    /* RETURN TO LOGIN               */
+    /* ============================= */
 
     function returnToMenu() {
 
-      // Stop listening for messages and typing updates
       if (unsubscribeMessages) {
         unsubscribeMessages();
         unsubscribeMessages = null;
@@ -1162,16 +2090,19 @@
         unsubscribePresence = null;
       }
 
-      // Stop typing status
       clearTimeout(typingTimeout);
       clearTimeout(typingWriteTimeout);
+
+      if (presenceInterval) {
+        clearInterval(presenceInterval);
+        presenceInterval = null;
+      }
+
       isCurrentlyTyping = false;
 
-      // Hide the chat and show the login/menu screen
       document.getElementById("chatScreen").style.display = "none";
       document.getElementById("loginScreen").style.display = "flex";
 
-      // Clear the current chat
       document.getElementById("messages").innerHTML = `
         <div class="empty" id="emptyMessage">
           No messages yet.<br>
@@ -1179,32 +2110,29 @@
         </div>
       `;
 
-      // Clear the message composer
       document.getElementById("messageInput").value = "";
       document.getElementById("photoInput").value = "";
       document.getElementById("roomDisplay").textContent = "";
       document.getElementById("typingIndicator").classList.remove("show");
       document.getElementById("emojiPicker").classList.remove("show");
 
-      // Cancel any active reply
       cancelReply();
 
-      // Clear the login fields so a new name/room can be entered
       document.getElementById("nameInput").value = "";
       document.getElementById("roomInput").value = "";
       document.getElementById("error").textContent = "";
 
-      // Reset the current room/user details
       username = "";
       roomCode = "";
 
-      window.scrollTo(0, 0);
+      refreshDeveloperInfo();
+
     }
 
 
-    /*
-      ENTER CHAT
-    */
+    /* ============================= */
+    /* ENTER CHAT                    */
+    /* ============================= */
 
     function enterChat() {
 
@@ -1246,36 +2174,34 @@
       }
 
       username = name;
-
       roomCode = room;
 
-      document.getElementById("loginScreen")
-        .style.display = "none";
-
-      document.getElementById("chatScreen")
-        .style.display = "flex";
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("chatScreen").style.display = "flex";
 
       document.getElementById("roomDisplay")
         .textContent = "Room: " + roomCode;
 
       listenForMessages();
       listenForTyping();
-
       updatePresence();
 
-      setInterval(
-        updatePresence,
-        20000
-      );
+      if (presenceInterval) {
+        clearInterval(presenceInterval);
+      }
+
+      presenceInterval =
+        setInterval(updatePresence, 20000);
 
       setupNotifications();
+      refreshDeveloperInfo();
 
     }
 
 
-    /*
-      SEND TEXT MESSAGE
-    */
+    /* ============================= */
+    /* SEND MESSAGE                  */
+    /* ============================= */
 
     async function sendMessage() {
 
@@ -1286,13 +2212,14 @@
         input.value.trim();
 
       if (!text) return;
-
       if (!currentUser) return;
 
       input.value = "";
+
       stopTyping();
 
       const replyTo = replyingTo;
+
       cancelReply();
 
       try {
@@ -1300,32 +2227,31 @@
         await db.collection("messages").add({
 
           room: roomCode,
-
           text: text,
-
           sender: currentUser.uid,
-
           senderName: username,
-
           type: "text",
 
-          ...(replyTo ? { replyTo: replyTo } : {}),
+          ...(replyTo
+            ? {replyTo: replyTo}
+            : {}),
 
           timestamp:
             firebase.firestore.FieldValue.serverTimestamp(),
 
           readBy: {
-
             [currentUser.uid]: true
-
           }
 
         });
 
+        if (featureEnabled("sound")) {
+          playMessageSound();
+        }
 
-        /*
-          SEND NOTIFICATION
-        */
+        if (featureEnabled("vibration")) {
+          vibrateDevice(30);
+        }
 
         sendNotification(text);
 
@@ -1342,36 +2268,35 @@
     }
 
 
-    /*
-      SEND NOTIFICATION THROUGH VERCEL
-    */
+    /* ============================= */
+    /* NOTIFICATION SERVER           */
+    /* ============================= */
 
     async function sendNotification(notificationText) {
 
       try {
 
         const response =
-          await fetch(notificationServer, {
+          await fetch(
+            notificationServer,
+            {
+              method: "POST",
 
-            method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
 
-            headers: {
-              "Content-Type": "application/json"
-            },
+              body: JSON.stringify({
 
-            body: JSON.stringify({
+                room: roomCode,
+                senderName: username,
+                senderUid: currentUser.uid,
+                text: notificationText
 
-              room: roomCode,
+              })
 
-              senderName: username,
-
-              senderUid: currentUser.uid,
-
-              text: notificationText
-
-            })
-
-          });
+            }
+          );
 
         const result =
           await response.json();
@@ -1393,11 +2318,15 @@
     }
 
 
-    /*
-      OPEN PHONE / COMPUTER PHOTO PICKER
-    */
+    /* ============================= */
+    /* PHOTO SYSTEM                  */
+    /* ============================= */
 
     function openPhotoPicker() {
+
+      if (!featureEnabled("photos")) {
+        return;
+      }
 
       document
         .getElementById("photoInput")
@@ -1406,11 +2335,12 @@
     }
 
 
-    /*
-      PHOTO OR VIDEO SELECTED
-    */
-
     async function handlePhotoSelected(event) {
+
+      if (!featureEnabled("photos")) {
+        event.target.value = "";
+        return;
+      }
 
       const file =
         event.target.files[0];
@@ -1428,8 +2358,11 @@
 
       }
 
-      const isImage = file.type.startsWith("image/");
-      const isVideo = file.type.startsWith("video/");
+      const isImage =
+        file.type.startsWith("image/");
+
+      const isVideo =
+        file.type.startsWith("video/");
 
       if (!isImage && !isVideo) {
 
@@ -1445,7 +2378,9 @@
       try {
 
         stopTyping();
+
         const replyTo = replyingTo;
+
         cancelReply();
 
         const photoButton =
@@ -1465,23 +2400,15 @@
 
         let uploadFile = file;
 
-        /*
-          Resize/compress photos first.
-          Videos are uploaded without changing them.
-        */
-
         if (isImage) {
-          uploadFile = await compressImage(file);
+          uploadFile =
+            await compressImage(file);
         }
 
         uploadStatus.textContent =
           isVideo
             ? "Uploading video..."
             : "Uploading photo...";
-
-        /*
-          Upload to the correct Cloudinary resource type.
-        */
 
         const formData =
           new FormData();
@@ -1497,7 +2424,9 @@
         );
 
         const resourceType =
-          isVideo ? "video" : "image";
+          isVideo
+            ? "video"
+            : "image";
 
         const uploadResponse =
           await fetch(
@@ -1509,19 +2438,9 @@
           );
 
         if (!uploadResponse.ok) {
-
-          const errorText =
-            await uploadResponse.text();
-
-          console.error(
-            "Cloudinary error:",
-            errorText
-          );
-
           throw new Error(
             `${isVideo ? "Video" : "Photo"} upload failed.`
           );
-
         }
 
         const uploadResult =
@@ -1530,27 +2449,26 @@
         const mediaUrl =
           uploadResult.secure_url;
 
-        /*
-          Save the media message to Firestore.
-        */
-
         await db.collection("messages").add({
 
           room: roomCode,
-
           text: "",
 
           ...(isImage
-            ? { imageUrl: mediaUrl }
-            : { videoUrl: mediaUrl }),
+            ? {imageUrl: mediaUrl}
+            : {videoUrl: mediaUrl}),
 
-          type: isImage ? "image" : "video",
+          type:
+            isImage
+              ? "image"
+              : "video",
 
           sender: currentUser.uid,
-
           senderName: username,
 
-          ...(replyTo ? { replyTo: replyTo } : {}),
+          ...(replyTo
+            ? {replyTo: replyTo}
+            : {}),
 
           timestamp:
             firebase.firestore.FieldValue.serverTimestamp(),
@@ -1560,10 +2478,6 @@
           }
 
         });
-
-        /*
-          Tell the other device that media was sent.
-        */
 
         sendNotification(
           isVideo
@@ -1576,12 +2490,17 @@
             ? "Video sent!"
             : "Photo sent!";
 
+        if (featureEnabled("sound")) {
+          playMessageSound();
+        }
+
+        if (featureEnabled("vibration")) {
+          vibrateDevice(40);
+        }
+
         setTimeout(() => {
-
           uploadStatus.classList.remove("show");
-
         }, 1200);
-
 
       } catch (error) {
 
@@ -1606,19 +2525,10 @@
         .getElementById("photoButton")
         .classList.remove("uploading");
 
-      /*
-        Reset file input so the same photo/video
-        can be selected again.
-      */
-
       event.target.value = "";
 
     }
 
-
-    /*
-      COMPRESS PHOTO
-    */
 
     function compressImage(file) {
 
@@ -1635,19 +2545,10 @@
           image.onload = function() {
 
             const maxWidth = 1600;
-
             const maxHeight = 1600;
 
-            let width =
-              image.width;
-
-            let height =
-              image.height;
-
-
-            /*
-              Keep the original proportions.
-            */
+            let width = image.width;
+            let height = image.height;
 
             if (
               width > maxWidth ||
@@ -1667,35 +2568,21 @@
                 );
 
               width =
-                Math.round(
-                  width * ratio
-                );
+                Math.round(width * ratio);
 
               height =
-                Math.round(
-                  height * ratio
-                );
+                Math.round(height * ratio);
 
             }
 
-
             const canvas =
-              document.createElement(
-                "canvas"
-              );
+              document.createElement("canvas");
 
-            canvas.width =
-              width;
-
-            canvas.height =
-              height;
-
+            canvas.width = width;
+            canvas.height = height;
 
             const context =
-              canvas.getContext(
-                "2d"
-              );
-
+              canvas.getContext("2d");
 
             context.drawImage(
               image,
@@ -1704,7 +2591,6 @@
               width,
               height
             );
-
 
             canvas.toBlob(
               function(blob) {
@@ -1721,19 +2607,14 @@
 
                 }
 
-
-                const compressedFile =
+                resolve(
                   new File(
                     [blob],
                     "matechat-photo.jpg",
                     {
                       type: "image/jpeg"
                     }
-                  );
-
-
-                resolve(
-                  compressedFile
+                  )
                 );
 
               },
@@ -1743,36 +2624,24 @@
 
           };
 
-
           image.onerror =
-            function() {
-
-              reject(
-                new Error(
-                  "Could not read image."
-                )
-              );
-
-            };
-
+            () => reject(
+              new Error(
+                "Could not read image."
+              )
+            );
 
           image.src =
             event.target.result;
 
         };
 
-
         reader.onerror =
-          function() {
-
-            reject(
-              new Error(
-                "Could not read file."
-              )
-            );
-
-          };
-
+          () => reject(
+            new Error(
+              "Could not read file."
+            )
+          );
 
         reader.readAsDataURL(file);
 
@@ -1781,27 +2650,49 @@
     }
 
 
-    /*
-      REPLY TO A MESSAGE
-    */
+    /* ============================= */
+    /* REPLIES                       */
+    /* ============================= */
 
     function startReply(messageId, message) {
 
+      if (!featureEnabled("replies")) {
+        return;
+      }
+
       replyingTo = {
+
         id: messageId,
-        sender: message.sender || "",
-        senderName: message.senderName || "Unknown",
-        text: message.text || "",
-        imageUrl: message.imageUrl || "",
-        type: message.type || "text"
+
+        sender:
+          message.sender || "",
+
+        senderName:
+          message.senderName || "Unknown",
+
+        text:
+          message.text || "",
+
+        imageUrl:
+          message.imageUrl || "",
+
+        type:
+          message.type || "text"
+
       };
 
-      const preview = document.getElementById("replyPreview");
-      const title = document.getElementById("replyPreviewTitle");
-      const previewText = document.getElementById("replyPreviewText");
+      const preview =
+        document.getElementById("replyPreview");
 
-      title.textContent = "Replying to " + replyingTo.senderName;
-      previewText.textContent =
+      document.getElementById(
+        "replyPreviewTitle"
+      ).textContent =
+        "Replying to " +
+        replyingTo.senderName;
+
+      document.getElementById(
+        "replyPreviewText"
+      ).textContent =
         replyingTo.type === "image"
           ? "📷 Photo"
           : replyingTo.type === "video"
@@ -1810,10 +2701,10 @@
 
       preview.classList.add("show");
 
-      document.getElementById("messageInput").focus();
+      document
+        .getElementById("messageInput")
+        .focus();
 
-      document.getElementById("messages").scrollTop =
-        document.getElementById("messages").scrollHeight;
     }
 
 
@@ -1830,7 +2721,10 @@
 
     function jumpToMessage(messageId) {
 
-      const target = document.getElementById("message-" + messageId);
+      const target =
+        document.getElementById(
+          "message-" + messageId
+        );
 
       if (!target) return;
 
@@ -1839,35 +2733,85 @@
         block: "center"
       });
 
-      target.classList.add("highlight-message");
+      target.classList.add(
+        "highlight-message"
+      );
 
       setTimeout(() => {
-        target.classList.remove("highlight-message");
+
+        target.classList.remove(
+          "highlight-message"
+        );
+
       }, 1200);
+
     }
 
 
-          async function deleteMessage(messageId, message) {
-        if (!currentUser || message.sender !== currentUser.uid) return;
+    /* ============================= */
+    /* DELETE MESSAGE                */
+    /* ============================= */
 
-        const confirmed = confirm("Delete this message?");
-        if (!confirmed) return;
+    async function deleteMessage(
+      messageId,
+      message
+    ) {
 
-        try {
-          await db.collection("messages").doc(messageId).delete();
-        } catch (error) {
-          console.error("Delete message error:", error);
-          alert("Message could not be deleted. Please try again.");
-        }
+      if (!featureEnabled("deletion")) {
+        return;
       }
 
-/*
-      TYPING STATUS
-    */
+      if (
+        !currentUser ||
+        message.sender !== currentUser.uid
+      ) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "Delete this message?"
+        );
+
+      if (!confirmed) return;
+
+      try {
+
+        await db
+          .collection("messages")
+          .doc(messageId)
+          .delete();
+
+      } catch (error) {
+
+        console.error(
+          "Delete message error:",
+          error
+        );
+
+        alert(
+          "Message could not be deleted. Please check your Firestore rules."
+        );
+
+      }
+
+    }
+
+
+    /* ============================= */
+    /* TYPING                        */
+    /* ============================= */
 
     function updateTypingStatus() {
 
-      const input = document.getElementById("messageInput");
+      if (!featureEnabled("typing")) {
+        return;
+      }
+
+      const input =
+        document.getElementById(
+          "messageInput"
+        );
 
       if (!input.value.trim()) {
         stopTyping();
@@ -1875,47 +2819,95 @@
       }
 
       if (!isCurrentlyTyping) {
+
         isCurrentlyTyping = true;
+
         setTypingStatus(true);
+
       }
 
-      clearTimeout(typingTimeout);
+      clearTimeout(
+        typingTimeout
+      );
 
-      typingTimeout = setTimeout(() => {
-        stopTyping();
-      }, 2000);
+      typingTimeout =
+        setTimeout(
+          () => {
+            stopTyping();
+          },
+          2000
+        );
+
     }
 
 
     async function setTypingStatus(typing) {
 
-      if (!currentUser || !roomCode) return;
+      if (
+        !currentUser ||
+        !roomCode ||
+        !featureEnabled("typing")
+      ) {
+        return;
+      }
 
-      clearTimeout(typingWriteTimeout);
+      clearTimeout(
+        typingWriteTimeout
+      );
 
-      typingWriteTimeout = setTimeout(async () => {
-        try {
-          await db.collection("presence")
-            .doc(currentUser.uid)
-            .set({
-              username: username,
-              room: roomCode,
-              typing: typing,
-              typingAt: firebase.firestore.FieldValue.serverTimestamp(),
-              lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        } catch (error) {
-          console.log("Typing status error:", error);
-        }
-      }, 50);
+      typingWriteTimeout =
+        setTimeout(
+          async () => {
+
+            try {
+
+              await db
+                .collection("presence")
+                .doc(currentUser.uid)
+                .set({
+
+                  username: username,
+                  room: roomCode,
+                  typing: typing,
+
+                  typingAt:
+                    firebase.firestore.FieldValue.serverTimestamp(),
+
+                  lastSeen:
+                    firebase.firestore.FieldValue.serverTimestamp()
+
+                }, {
+                  merge: true
+                });
+
+            } catch (error) {
+
+              console.log(
+                "Typing status error:",
+                error
+              );
+
+            }
+
+          },
+          50
+        );
+
     }
 
 
     function stopTyping() {
 
-      clearTimeout(typingTimeout);
+      clearTimeout(
+        typingTimeout
+      );
+
       isCurrentlyTyping = false;
-      setTypingStatus(false);
+
+      if (featureEnabled("typing")) {
+        setTypingStatus(false);
+      }
+
     }
 
 
@@ -1925,86 +2917,95 @@
         unsubscribePresence();
       }
 
-      unsubscribePresence = db.collection("presence")
-        .where("room", "==", roomCode)
-        .onSnapshot((snapshot) => {
+      unsubscribePresence =
+        db.collection("presence")
+          .where(
+            "room",
+            "==",
+            roomCode
+          )
+          .onSnapshot(
+            (snapshot) => {
 
-          let someoneTyping = false;
+              let someoneTyping = false;
 
-          const now = Date.now();
+              const now = Date.now();
 
-          snapshot.forEach((doc) => {
+              snapshot.forEach(
+                (doc) => {
 
-            if (doc.id === currentUser.uid) return;
+                  if (
+                    doc.id ===
+                    currentUser.uid
+                  ) {
+                    return;
+                  }
 
-            const data = doc.data();
+                  const data =
+                    doc.data();
 
-            if (data.typing === true) {
+                  if (
+                    data.typing === true &&
+                    featureEnabled("typing")
+                  ) {
 
-              let typingTime = 0;
+                    let typingTime = 0;
 
-              if (data.typingAt && data.typingAt.toMillis) {
-                typingTime = data.typingAt.toMillis();
-              }
+                    if (
+                      data.typingAt &&
+                      data.typingAt.toMillis
+                    ) {
 
-              if (typingTime && now - typingTime < 4000) {
-                someoneTyping = true;
-              }
+                      typingTime =
+                        data.typingAt.toMillis();
+
+                    }
+
+                    if (
+                      typingTime &&
+                      now - typingTime < 4000
+                    ) {
+
+                      someoneTyping = true;
+
+                    }
+
+                  }
+
+                }
+              );
+
+              document
+                .getElementById(
+                  "typingIndicator"
+                )
+                .classList.toggle(
+                  "show",
+                  someoneTyping
+                );
+
+            },
+            (error) => {
+
+              console.log(
+                "Typing listener error:",
+                error
+              );
+
             }
-          });
+          );
 
-          document
-            .getElementById("typingIndicator")
-            .classList.toggle("show", someoneTyping);
-
-        }, (error) => {
-          console.log("Typing listener error:", error);
-        });
     }
 
 
-    /*
-      ENTER KEY SENDS MESSAGE
-    */
-
-    document
-      .getElementById("messageInput")
-      .addEventListener(
-        "input",
-        function() {
-          updateTypingStatus();
-        }
-      );
-
-
-    document
-      .getElementById("messageInput")
-      .addEventListener(
-        "keydown",
-        function(event) {
-
-          if (event.key === "Enter") {
-
-            event.preventDefault();
-
-            sendMessage();
-
-          }
-
-        }
-      );
-
-
-    /*
-      LOAD MESSAGES
-    */
+    /* ============================= */
+    /* LOAD MESSAGES                 */
+    /* ============================= */
 
     function listenForMessages() {
 
       if (unsubscribeMessages) {
-
         unsubscribeMessages();
-
       }
 
       unsubscribeMessages =
@@ -2020,7 +3021,7 @@
           )
           .onSnapshot(
 
-            (snapshot) => {
+            async (snapshot) => {
 
               const container =
                 document.getElementById(
@@ -2029,6 +3030,8 @@
 
               container.innerHTML = "";
 
+              developerMessageCount =
+                snapshot.size;
 
               if (snapshot.empty) {
 
@@ -2039,336 +3042,431 @@
                   </div>
                 `;
 
+                refreshDeveloperInfo();
+
                 return;
 
               }
 
 
-              snapshot.forEach(
-                async (doc) => {
-
-                  const message =
-                    doc.data();
-
-
-                  const isMine =
-                    message.sender ===
-                    currentUser.uid;
-
-
-                  const div =
-                    document.createElement(
-                      "div"
-                    );
-
-
-                  div.id = "message-" + doc.id;
-
-                  div.className =
-                    "message " +
-                    (
-                      isMine
-                        ? "mine"
-                        : "theirs"
-                    );
-
-
-                  const time =
-                    message.timestamp
-                      ? message.timestamp.toDate()
-                      : new Date();
-
-
-                  const timeText =
-                    time.toLocaleTimeString(
-                      [],
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit"
-                      }
-                    );
-
-
-                  let readText = "";
-
-
-                  if (isMine) {
-
-                    const readBy =
-                      message.readBy || {};
-
-
-                    const someoneRead =
-                      Object.keys(readBy)
-                        .some(
-                          uid =>
-                            uid !==
-                            currentUser.uid &&
-                            readBy[uid]
-                        );
-
-
-                    readText =
-                      someoneRead
-                        ? "✓✓ Read"
-                        : "✓ Sent";
-
-                  }
-
-
-                  const reply = message.replyTo || null;
-
-                  let replyHTML = "";
-
-                  if (reply) {
-
-                    const replyPreviewText =
-                      reply.type === "image"
-                        ? "📷 Photo"
-                        : reply.type === "video"
-                          ? "🎥 Video"
-                          : (reply.text || "Message");
-
-                    replyHTML = `
-                      <div class="reply-reference" data-jump-id="${escapeHTML(reply.id || "")}">
-                        <div class="reply-reference-name">
-                          ${escapeHTML(reply.senderName || "Unknown")}
-                        </div>
-                        <div class="reply-reference-text">
-                          ${escapeHTML(replyPreviewText)}
-                        </div>
-                      </div>
-                    `;
-                  }
-
-                  const replyButtonHTML = `
-                    <div class="message-actions">
-                      <button class="reply-button" type="button">↩ Reply</button>
-                      ${isMine ? `<button class="delete-button" type="button">🗑 Delete</button>` : ""}
-                    </div>
-                  `;
-
-                  /*
-                    IMAGE MESSAGE
-                  */
-
-                  if (
-                    message.type === "image" &&
-                    message.imageUrl
-                  ) {
-
-                    div.innerHTML = `
-
-                      <div class="sender">
-                        ${escapeHTML(
-                          message.senderName ||
-                          "Unknown"
-                        )}
-                      </div>
-
-                      ${replyHTML}
-
-                      <img
-                        class="message-image"
-                        src="${escapeHTML(
-                          message.imageUrl
-                        )}"
-                        alt="Photo"
-                        loading="lazy"
-                      >
-
-                      ${replyButtonHTML}
-
-                      <div class="message-info">
-
-                        ${timeText}
-
-                        ${
-                          isMine
-                            ? " • " + readText
-                            : ""
-                        }
-
-                      </div>
-
-                    `;
-
-                  } else if (
-                    message.type === "video" &&
-                    message.videoUrl
-                  ) {
-
-                    div.innerHTML = `
-
-                      <div class="sender">
-                        ${escapeHTML(
-                          message.senderName ||
-                          "Unknown"
-                        )}
-                      </div>
-
-                      ${replyHTML}
-
-                      <video
-                        class="message-video"
-                        src="${escapeHTML(
-                          message.videoUrl
-                        )}"
-                        controls
-                        playsinline
-                        preload="metadata"
-                      ></video>
-
-                      ${replyButtonHTML}
-
-                      <div class="message-info">
-
-                        ${timeText}
-
-                        ${
-                          isMine
-                            ? " • " + readText
-                            : ""
-                        }
-
-                      </div>
-
-                    `;
-
-                  } else {
-
-                    /*
-                      NORMAL TEXT MESSAGE
-                    */
-
-                    div.innerHTML = `
-
-                      <div class="sender">
-                        ${escapeHTML(
-                          message.senderName ||
-                          "Unknown"
-                        )}
-                      </div>
-
-                      ${replyHTML}
-
-                      <div class="message-text">
-                        ${escapeHTML(
-                          message.text || ""
-                        )}
-                      </div>
-
-                      ${replyButtonHTML}
-
-                      <div class="message-info">
-
-                        ${timeText}
-
-                        ${
-                          isMine
-                            ? " • " + readText
-                            : ""
-                        }
-
-                      </div>
-
-                    `;
-
-                  }
-
-                  const replyButton =
-                    div.querySelector(".reply-button");
-
-                  replyButton.addEventListener("click", (event) => {
-                    event.stopPropagation();
-                    startReply(doc.id, message);
-                  });
-
-                  const deleteButton =
-                    div.querySelector(".delete-button");
-
-                  if (deleteButton) {
-                    deleteButton.addEventListener("click", (event) => {
-                      event.stopPropagation();
-                      deleteMessage(doc.id, message);
-                    });
-                  }
-
-                  const replyReference =
-                    div.querySelector(".reply-reference");
-
-                  if (replyReference) {
-                    replyReference.addEventListener("click", (event) => {
-                      event.stopPropagation();
-                      jumpToMessage(replyReference.dataset.jumpId);
-                    });
-                  }
-
-                  const messageImage =
-                    div.querySelector(".message-image");
-
-                  if (messageImage) {
-                    messageImage.addEventListener("click", () => {
-                      window.open(messageImage.src, "_blank");
-                    });
-                  }
-
-                  container.appendChild(
-                    div
+              for (
+                const doc of snapshot.docs
+              ) {
+
+                const message =
+                  doc.data();
+
+                const isMine =
+                  message.sender ===
+                  currentUser.uid;
+
+                const div =
+                  document.createElement(
+                    "div"
                   );
 
+                div.id =
+                  "message-" +
+                  doc.id;
 
-                  /*
-                    MARK MESSAGE AS READ
-                  */
+                div.className =
+                  "message " +
+                  (
+                    isMine
+                      ? "mine"
+                      : "theirs"
+                  );
 
-                  if (!isMine) {
+                const time =
+                  message.timestamp
+                    ? message.timestamp.toDate()
+                    : new Date();
 
-                    const readBy =
-                      message.readBy || {};
+                const timeText =
+                  time.toLocaleTimeString(
+                    [],
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    }
+                  );
+
+                let readText = "";
+
+                if (isMine) {
+
+                  const readBy =
+                    message.readBy || {};
+
+                  const someoneRead =
+                    Object.keys(readBy)
+                      .some(
+                        uid =>
+                          uid !==
+                          currentUser.uid &&
+                          readBy[uid]
+                      );
+
+                  readText =
+                    someoneRead
+                      ? "✓✓ Read"
+                      : "✓ Sent";
+
+                }
 
 
-                    if (
-                      !readBy[
-                        currentUser.uid
-                      ]
-                    ) {
+                const reply =
+                  message.replyTo ||
+                  null;
 
-                      try {
+                let replyHTML = "";
 
-                        await db
-                          .collection("messages")
-                          .doc(doc.id)
-                          .update({
+                if (
+                  reply &&
+                  featureEnabled("replies")
+                ) {
 
-                            [
-                              `readBy.${currentUser.uid}`
-                            ]: true
+                  const replyPreviewText =
+                    reply.type === "image"
+                      ? "📷 Photo"
+                      : reply.type === "video"
+                        ? "🎥 Video"
+                        : (
+                            reply.text ||
+                            "Message"
+                          );
 
-                          });
+                  replyHTML = `
 
-                      } catch (error) {
+                    <div
+                      class="reply-reference"
+                      data-jump-id="${escapeHTML(
+                        reply.id || ""
+                      )}"
+                    >
 
-                        console.log(
-                          "Read receipt error:",
-                          error
-                        );
+                      <div class="reply-reference-name">
+                        ${escapeHTML(
+                          reply.senderName ||
+                          "Unknown"
+                        )}
+                      </div>
 
+                      <div class="reply-reference-text">
+                        ${escapeHTML(
+                          replyPreviewText
+                        )}
+                      </div>
+
+                    </div>
+
+                  `;
+
+                }
+
+
+                const replyButtonHTML = `
+
+                  <div class="message-actions">
+
+                    ${
+                      featureEnabled("replies")
+                        ? `
+                          <button
+                            class="reply-button"
+                            type="button"
+                          >
+                            ↩ Reply
+                          </button>
+                        `
+                        : ""
+                    }
+
+                    ${
+                      isMine &&
+                      featureEnabled("deletion")
+                        ? `
+                          <button
+                            class="delete-button"
+                            type="button"
+                          >
+                            🗑 Delete
+                          </button>
+                        `
+                        : ""
+                    }
+
+                  </div>
+
+                `;
+
+
+                if (
+                  message.type === "image" &&
+                  message.imageUrl
+                ) {
+
+                  div.innerHTML = `
+
+                    <div class="sender">
+                      ${escapeHTML(
+                        message.senderName ||
+                        "Unknown"
+                      )}
+                    </div>
+
+                    ${replyHTML}
+
+                    <img
+                      class="message-image"
+                      src="${escapeHTML(
+                        message.imageUrl
+                      )}"
+                      alt="Photo"
+                      loading="lazy"
+                    >
+
+                    ${replyButtonHTML}
+
+                    <div class="message-info">
+
+                      ${timeText}
+
+                      ${
+                        isMine
+                          ? " • " + readText
+                          : ""
                       }
+
+                    </div>
+
+                  `;
+
+                } else if (
+                  message.type === "video" &&
+                  message.videoUrl
+                ) {
+
+                  div.innerHTML = `
+
+                    <div class="sender">
+                      ${escapeHTML(
+                        message.senderName ||
+                        "Unknown"
+                      )}
+                    </div>
+
+                    ${replyHTML}
+
+                    <video
+                      class="message-video"
+                      src="${escapeHTML(
+                        message.videoUrl
+                      )}"
+                      controls
+                      playsinline
+                      preload="metadata"
+                    ></video>
+
+                    ${replyButtonHTML}
+
+                    <div class="message-info">
+
+                      ${timeText}
+
+                      ${
+                        isMine
+                          ? " • " + readText
+                          : ""
+                      }
+
+                    </div>
+
+                  `;
+
+                } else {
+
+                  div.innerHTML = `
+
+                    <div class="sender">
+                      ${escapeHTML(
+                        message.senderName ||
+                        "Unknown"
+                      )}
+                    </div>
+
+                    ${replyHTML}
+
+                    <div class="message-text">
+                      ${escapeHTML(
+                        message.text ||
+                        ""
+                      )}
+                    </div>
+
+                    ${replyButtonHTML}
+
+                    <div class="message-info">
+
+                      ${timeText}
+
+                      ${
+                        isMine
+                          ? " • " + readText
+                          : ""
+                      }
+
+                    </div>
+
+                  `;
+
+                }
+
+
+                const replyButton =
+                  div.querySelector(
+                    ".reply-button"
+                  );
+
+                if (replyButton) {
+
+                  replyButton.addEventListener(
+                    "click",
+                    (event) => {
+
+                      event.stopPropagation();
+
+                      startReply(
+                        doc.id,
+                        message
+                      );
+
+                    }
+                  );
+
+                }
+
+
+                const deleteButton =
+                  div.querySelector(
+                    ".delete-button"
+                  );
+
+                if (deleteButton) {
+
+                  deleteButton.addEventListener(
+                    "click",
+                    (event) => {
+
+                      event.stopPropagation();
+
+                      deleteMessage(
+                        doc.id,
+                        message
+                      );
+
+                    }
+                  );
+
+                }
+
+
+                const replyReference =
+                  div.querySelector(
+                    ".reply-reference"
+                  );
+
+                if (replyReference) {
+
+                  replyReference.addEventListener(
+                    "click",
+                    (event) => {
+
+                      event.stopPropagation();
+
+                      jumpToMessage(
+                        replyReference.dataset.jumpId
+                      );
+
+                    }
+                  );
+
+                }
+
+
+                const messageImage =
+                  div.querySelector(
+                    ".message-image"
+                  );
+
+                if (messageImage) {
+
+                  messageImage.addEventListener(
+                    "click",
+                    () => {
+                      window.open(
+                        messageImage.src,
+                        "_blank"
+                      );
+                    }
+                  );
+
+                }
+
+
+                container.appendChild(div);
+
+
+                if (
+                  !isMine &&
+                  featureEnabled("readReceipts")
+                ) {
+
+                  const readBy =
+                    message.readBy ||
+                    {};
+
+                  if (
+                    !readBy[
+                      currentUser.uid
+                    ]
+                  ) {
+
+                    try {
+
+                      await db
+                        .collection("messages")
+                        .doc(doc.id)
+                        .update({
+
+                          [
+                            `readBy.${currentUser.uid}`
+                          ]: true
+
+                        });
+
+                    } catch (error) {
+
+                      console.log(
+                        "Read receipt error:",
+                        error
+                      );
 
                     }
 
                   }
 
                 }
-              );
+
+              }
 
 
               container.scrollTop =
                 container.scrollHeight;
 
-            },
+              refreshDeveloperInfo();
 
+            },
 
             (error) => {
 
@@ -2392,21 +3490,23 @@
     }
 
 
-    /*
-      ONLINE PRESENCE
-    */
+    /* ============================= */
+    /* PRESENCE                      */
+    /* ============================= */
 
     async function updatePresence() {
 
       if (
         !currentUser ||
         !roomCode
-      ) return;
-
+      ) {
+        return;
+      }
 
       try {
 
-        await db.collection("presence")
+        await db
+          .collection("presence")
           .doc(currentUser.uid)
           .set({
 
@@ -2417,13 +3517,16 @@
             lastSeen:
               firebase.firestore.FieldValue.serverTimestamp()
 
-          }, { merge: true });
-
+          }, {
+            merge: true
+          });
 
         document.getElementById(
           "onlineText"
-        ).textContent = "Online";
+        ).textContent =
+          "Online";
 
+        refreshDeveloperInfo();
 
       } catch (error) {
 
@@ -2437,26 +3540,996 @@
     }
 
 
-    /*
-      STOP TYPING WHEN LEAVING THE PAGE
-    */
+    /* ============================= */
+    /* ENTER KEY                    */
+    /* ============================= */
 
-    window.addEventListener("beforeunload", () => {
-      if (currentUser && roomCode) {
-        db.collection("presence")
-          .doc(currentUser.uid)
-          .set({
-            typing: false,
-            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true })
-          .catch(() => {});
+    document
+      .getElementById("messageInput")
+      .addEventListener(
+        "input",
+        updateTypingStatus
+      );
+
+
+    document
+      .getElementById("messageInput")
+      .addEventListener(
+        "keydown",
+        function(event) {
+
+          if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            sendMessage();
+
+          }
+
+        }
+      );
+
+
+    /* ============================= */
+    /* DEVELOPER USER CONTROLS       */
+    /* ============================= */
+
+    function devChangeName() {
+
+      if (!username) {
+
+        alert(
+          "Enter the chat first."
+        );
+
+        return;
+
       }
-    });
+
+      const input =
+        document.getElementById(
+          "devNameInput"
+        );
+
+      const newName =
+        input.value.trim();
+
+      if (!newName) {
+
+        alert(
+          "Enter a new name."
+        );
+
+        return;
+
+      }
+
+      username = newName;
+
+      document.getElementById(
+        "devNameInput"
+      ).value = "";
+
+      updatePresence();
+
+      alert(
+        "Displayed name changed to " +
+        username
+      );
+
+      refreshDeveloperInfo();
+
+    }
 
 
-    /*
-      HTML ESCAPING
-    */
+    function devShowSession() {
+
+      alert(
+
+        "Username: " +
+        (username || "None") +
+
+        "\n\nRoom: " +
+        (roomCode || "None") +
+
+        "\n\nUser ID: " +
+        (currentUser
+          ? currentUser.uid
+          : "None")
+
+      );
+
+    }
+
+
+    function devClearLoginFields() {
+
+      document.getElementById(
+        "nameInput"
+      ).value = "";
+
+      document.getElementById(
+        "roomInput"
+      ).value = "";
+
+      document.getElementById(
+        "error"
+      ).textContent = "";
+
+      alert(
+        "Login fields cleared."
+      );
+
+    }
+
+
+    function devReturnToLogin() {
+
+      closeDeveloperMenu();
+
+      returnToMenu();
+
+    }
+
+
+    /* ============================= */
+    /* DEVELOPER MESSAGE TESTS       */
+    /* ============================= */
+
+    async function devSendTestMessage() {
+
+      if (!currentUser || !roomCode) {
+
+        alert(
+          "Enter a chat first."
+        );
+
+        return;
+
+      }
+
+      const text =
+        document.getElementById(
+          "devTestMessage"
+        ).value.trim();
+
+      if (!text) return;
+
+      try {
+
+        await db
+          .collection("messages")
+          .add({
+
+            room: roomCode,
+
+            text: text,
+
+            sender: currentUser.uid,
+
+            senderName:
+              "[DEV] " + username,
+
+            type: "text",
+
+            timestamp:
+              firebase.firestore.FieldValue.serverTimestamp(),
+
+            readBy: {
+              [currentUser.uid]: true
+            }
+
+          });
+
+        if (featureEnabled("sound")) {
+          playMessageSound();
+        }
+
+        alert(
+          "Test message sent."
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Test message failed:\n" +
+          error.message
+        );
+
+      }
+
+    }
+
+
+    function devTestReply() {
+
+      const message =
+        document.querySelector(
+          ".message"
+        );
+
+      if (!message) {
+
+        alert(
+          "There are no messages to reply to."
+        );
+
+        return;
+
+      }
+
+      const replyButton =
+        message.querySelector(
+          ".reply-button"
+        );
+
+      if (replyButton) {
+
+        replyButton.click();
+
+        alert(
+          "Reply system activated on the first message."
+        );
+
+      }
+
+    }
+
+
+    function devTestTyping() {
+
+      if (!featureEnabled("typing")) {
+
+        alert(
+          "Typing indicator is disabled."
+        );
+
+        return;
+
+      }
+
+      const indicator =
+        document.getElementById(
+          "typingIndicator"
+        );
+
+      indicator.classList.add("show");
+
+      setTimeout(() => {
+
+        indicator.classList.remove(
+          "show"
+        );
+
+      }, 3000);
+
+    }
+
+
+    async function devMarkMessagesRead() {
+
+      if (!currentUser || !roomCode) {
+
+        alert(
+          "Enter a chat first."
+        );
+
+        return;
+
+      }
+
+      const snapshot =
+        await db
+          .collection("messages")
+          .where(
+            "room",
+            "==",
+            roomCode
+          )
+          .get();
+
+      const batch =
+        db.batch();
+
+      snapshot.forEach(doc => {
+
+        batch.update(
+          doc.ref,
+          {
+            [`readBy.${currentUser.uid}`]:
+              true
+          }
+        );
+
+      });
+
+      await batch.commit();
+
+      alert(
+        "Messages marked as read."
+      );
+
+    }
+
+
+    async function devMarkMessagesUnread() {
+
+      if (!currentUser || !roomCode) {
+
+        alert(
+          "Enter a chat first."
+        );
+
+        return;
+
+      }
+
+      const snapshot =
+        await db
+          .collection("messages")
+          .where(
+            "room",
+            "==",
+            roomCode
+          )
+          .get();
+
+      const batch =
+        db.batch();
+
+      snapshot.forEach(doc => {
+
+        batch.update(
+          doc.ref,
+          {
+            [`readBy.${currentUser.uid}`]:
+              false
+          }
+        );
+
+      });
+
+      await batch.commit();
+
+      alert(
+        "Unread state tested."
+      );
+
+    }
+
+
+    function devHighlightLastMessage() {
+
+      const messages =
+        document.querySelectorAll(
+          ".message"
+        );
+
+      if (!messages.length) {
+
+        alert(
+          "No messages loaded."
+        );
+
+        return;
+
+      }
+
+      const last =
+        messages[messages.length - 1];
+
+      last.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+      last.classList.add(
+        "highlight-message"
+      );
+
+      setTimeout(() => {
+
+        last.classList.remove(
+          "highlight-message"
+        );
+
+      }, 1500);
+
+    }
+
+
+    async function devDeleteOwnMessages() {
+
+      if (!currentUser || !roomCode) {
+
+        alert(
+          "Enter a chat first."
+        );
+
+        return;
+
+      }
+
+      const confirmed =
+        confirm(
+          "Delete ALL of your messages in this room?"
+        );
+
+      if (!confirmed) return;
+
+      try {
+
+        const snapshot =
+          await db
+            .collection("messages")
+            .where(
+              "room",
+              "==",
+              roomCode
+            )
+            .where(
+              "sender",
+              "==",
+              currentUser.uid
+            )
+            .get();
+
+        if (snapshot.empty) {
+
+          alert(
+            "You have no messages to delete."
+          );
+
+          return;
+
+        }
+
+        const batch =
+          db.batch();
+
+        snapshot.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+
+        alert(
+          "Your messages were deleted."
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Could not delete messages:\n" +
+          error.message
+        );
+
+      }
+
+    }
+
+
+    /* ============================= */
+    /* DEVELOPER NOTIFICATION TESTS  */
+    /* ============================= */
+
+    async function devTestBrowserNotification() {
+
+      if (
+        !("Notification" in window)
+      ) {
+
+        alert(
+          "This browser does not support notifications."
+        );
+
+        return;
+
+      }
+
+      if (
+        Notification.permission !==
+        "granted"
+      ) {
+
+        const permission =
+          await Notification.requestPermission();
+
+        if (
+          permission !==
+          "granted"
+        ) {
+
+          alert(
+            "Notification permission was not granted."
+          );
+
+          return;
+
+        }
+
+      }
+
+      new Notification(
+        "MateChat Developer Test",
+        {
+          body:
+            "Browser notifications are working!"
+        }
+      );
+
+    }
+
+
+    async function devRequestNotificationPermission() {
+
+      if (
+        !("Notification" in window)
+      ) {
+
+        alert(
+          "Notifications are not supported."
+        );
+
+        return;
+
+      }
+
+      const permission =
+        await Notification.requestPermission();
+
+      alert(
+        "Notification permission: " +
+        permission
+      );
+
+      refreshDeveloperInfo();
+
+    }
+
+
+    function playMessageSound() {
+
+      try {
+
+        const AudioContext =
+          window.AudioContext ||
+          window.webkitAudioContext;
+
+        if (!AudioContext) return;
+
+        const context =
+          new AudioContext();
+
+        const oscillator =
+          context.createOscillator();
+
+        const gain =
+          context.createGain();
+
+        oscillator.frequency.value =
+          650;
+
+        oscillator.type =
+          "sine";
+
+        gain.gain.setValueAtTime(
+          0.001,
+          context.currentTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.15,
+          context.currentTime + 0.01
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.001,
+          context.currentTime + 0.15
+        );
+
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+
+        oscillator.start();
+        oscillator.stop(
+          context.currentTime + 0.16
+        );
+
+      } catch (error) {
+
+        console.log(
+          "Sound error:",
+          error
+        );
+
+      }
+
+    }
+
+
+    function devTestSound() {
+
+      if (!featureEnabled("sound")) {
+
+        alert(
+          "Sound effects are disabled."
+        );
+
+        return;
+
+      }
+
+      playMessageSound();
+
+    }
+
+
+    function vibrateDevice(duration) {
+
+      if (
+        featureEnabled("vibration") &&
+        "vibrate" in navigator
+      ) {
+
+        navigator.vibrate(
+          duration
+        );
+
+      }
+
+    }
+
+
+    function devTestVibration() {
+
+      if (!featureEnabled("vibration")) {
+
+        alert(
+          "Vibration is disabled."
+        );
+
+        return;
+
+      }
+
+      if (
+        !("vibrate" in navigator)
+      ) {
+
+        alert(
+          "This device/browser does not support vibration."
+        );
+
+        return;
+
+      }
+
+      navigator.vibrate(
+        [100, 60, 100]
+      );
+
+    }
+
+
+    async function devTestNotificationServer() {
+
+      if (!currentUser || !roomCode) {
+
+        alert(
+          "Enter a chat first."
+        );
+
+        return;
+
+      }
+
+      try {
+
+        const response =
+          await fetch(
+            notificationServer,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+
+                room: roomCode,
+
+                senderName:
+                  "[Developer Test]",
+
+                senderUid:
+                  currentUser.uid,
+
+                text:
+                  "Developer notification test"
+
+              })
+
+            }
+          );
+
+        const result =
+          await response.text();
+
+        alert(
+          "Server response:\n\n" +
+          result
+        );
+
+      } catch (error) {
+
+        alert(
+          "Notification server test failed:\n\n" +
+          error.message
+        );
+
+      }
+
+    }
+
+
+    /* ============================= */
+    /* PHOTO TESTS                   */
+    /* ============================= */
+
+    function devOpenPhotoPicker() {
+
+      document
+        .getElementById("photoInput")
+        .click();
+
+    }
+
+
+    function devShowCloudinaryInfo() {
+
+      document.getElementById(
+        "devPhotoStatus"
+      ).textContent =
+
+        "Cloud name: " +
+        cloudinaryCloudName +
+        " | Upload preset: " +
+        cloudinaryUploadPreset;
+
+    }
+
+
+    function devTestPhotoButton() {
+
+      const button =
+        document.getElementById(
+          "photoButton"
+        );
+
+      button.animate(
+        [
+          {transform: "scale(1)"},
+          {transform: "scale(1.15)"},
+          {transform: "scale(1)"}
+        ],
+        {
+          duration: 400
+        }
+      );
+
+      document.getElementById(
+        "devPhotoStatus"
+      ).textContent =
+        "Photo button is responding.";
+
+    }
+
+
+    /* ============================= */
+    /* APPEARANCE                    */
+    /* ============================= */
+
+    function toggleLightMode() {
+
+      document.body.classList.toggle(
+        "light-mode"
+      );
+
+      const light =
+        document.body.classList.contains(
+          "light-mode"
+        );
+
+      localStorage.setItem(
+        "matechatTheme",
+        light
+          ? "light"
+          : "dark"
+      );
+
+      document.getElementById(
+        "devThemeStatus"
+      ).textContent =
+        "Theme: " +
+        (
+          light
+            ? "Light"
+            : "Dark"
+        );
+
+    }
+
+
+    function resetAppearance() {
+
+      document.body.classList.remove(
+        "light-mode"
+      );
+
+      localStorage.setItem(
+        "matechatTheme",
+        "dark"
+      );
+
+      document.getElementById(
+        "devThemeStatus"
+      ).textContent =
+        "Theme: Dark";
+
+    }
+
+
+    function loadTheme() {
+
+      if (
+        localStorage.getItem(
+          "matechatTheme"
+        ) === "light"
+      ) {
+
+        document.body.classList.add(
+          "light-mode"
+        );
+
+      }
+
+    }
+
+
+    /* ============================= */
+    /* DEBUG INFORMATION             */
+    /* ============================= */
+
+    function refreshDeveloperInfo() {
+
+      const firebaseStatus =
+        currentUser
+          ? "Connected"
+          : "Not connected";
+
+      document.getElementById(
+        "devFirebaseStatus"
+      ).textContent =
+        firebaseStatus;
+
+      document.getElementById(
+        "devUserId"
+      ).textContent =
+        currentUser
+          ? currentUser.uid
+          : "-";
+
+      document.getElementById(
+        "devUsername"
+      ).textContent =
+        username || "-";
+
+      document.getElementById(
+        "devCurrentUsername"
+      ).textContent =
+        username || "-";
+
+      document.getElementById(
+        "devRoom"
+      ).textContent =
+        roomCode || "-";
+
+      document.getElementById(
+        "devMessageCount"
+      ).textContent =
+        developerMessageCount;
+
+      document.getElementById(
+        "devOnlineStatus"
+      ).textContent =
+        currentUser &&
+        roomCode
+          ? "Online"
+          : "Offline";
+
+      document.getElementById(
+        "devBrowser"
+      ).textContent =
+        navigator.userAgent;
+
+      document.getElementById(
+        "devNotificationPermission"
+      ).textContent =
+        "Notification" in window
+          ? Notification.permission
+          : "Unsupported";
+
+      document.getElementById(
+        "devNotificationStatus"
+      ).textContent =
+        "Notification status: " +
+        (
+          "Notification" in window
+            ? Notification.permission
+            : "unsupported"
+        );
+
+      const light =
+        document.body.classList.contains(
+          "light-mode"
+        );
+
+      document.getElementById(
+        "devThemeStatus"
+      ).textContent =
+        "Theme: " +
+        (
+          light
+            ? "Light"
+            : "Dark"
+        );
+
+    }
+
+
+    /* ============================= */
+    /* PAGE CLEANUP                  */
+    /* ============================= */
+
+    window.addEventListener(
+      "beforeunload",
+      () => {
+
+        if (
+          currentUser &&
+          roomCode
+        ) {
+
+          db.collection("presence")
+            .doc(currentUser.uid)
+            .set({
+
+              typing: false,
+
+              lastSeen:
+                firebase.firestore.FieldValue.serverTimestamp()
+
+            }, {
+              merge: true
+            })
+            .catch(() => {});
+
+        }
+
+      }
+    );
+
+
+    /* ============================= */
+    /* HTML ESCAPING                 */
+    /* ============================= */
 
     function escapeHTML(text) {
 
@@ -2489,7 +4562,18 @@
 
     }
 
+
+    /* ============================= */
+    /* STARTUP                       */
+    /* ============================= */
+
+    loadTheme();
+    loadExperimentalCheckboxes();
+    applyExperimentalFeatures();
+    refreshDeveloperInfo();
+
   </script>
 
 </body>
-  </html>
+</html>
+```
