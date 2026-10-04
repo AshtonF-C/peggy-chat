@@ -364,6 +364,16 @@
       margin-top: 4px;
     }
 
+    .message-video {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      max-height: 400px;
+      border-radius: 12px;
+      margin-top: 4px;
+      background: #000;
+    }
+
     .photo-loading {
       padding: 10px;
       color: #d1d5db;
@@ -695,7 +705,7 @@
       <input
         id="photoInput"
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         style="display:none"
         onchange="handlePhotoSelected(event)"
       >
@@ -708,7 +718,7 @@
         id="photoButton"
         type="button"
         onclick="openPhotoPicker()"
-        title="Send a photo"
+        title="Send a photo or video"
       >
         📷
       </button>
@@ -1324,7 +1334,7 @@
 
 
     /*
-      PHOTO SELECTED
+      PHOTO OR VIDEO SELECTED
     */
 
     async function handlePhotoSelected(event) {
@@ -1340,18 +1350,21 @@
           "Please enter the chat first."
         );
 
+        event.target.value = "";
         return;
 
       }
 
-      if (!file.type.startsWith("image/")) {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
+
+      if (!isImage && !isVideo) {
 
         alert(
-          "Please choose an image."
+          "Please choose a photo or video."
         );
 
         event.target.value = "";
-
         return;
 
       }
@@ -1371,25 +1384,30 @@
         photoButton.classList.add("uploading");
 
         uploadStatus.textContent =
-          "Preparing photo...";
+          isVideo
+            ? "Preparing video..."
+            : "Preparing photo...";
 
         uploadStatus.classList.add("show");
 
+        let uploadFile = file;
 
         /*
-          Resize/compress the image first.
+          Resize/compress photos first.
+          Videos are uploaded without changing them.
         */
 
-        const compressedFile =
-          await compressImage(file);
-
+        if (isImage) {
+          uploadFile = await compressImage(file);
+        }
 
         uploadStatus.textContent =
-          "Uploading photo...";
-
+          isVideo
+            ? "Uploading video..."
+            : "Uploading photo...";
 
         /*
-          Upload directly to Cloudinary.
+          Upload to the correct Cloudinary resource type.
         */
 
         const formData =
@@ -1397,7 +1415,7 @@
 
         formData.append(
           "file",
-          compressedFile
+          uploadFile
         );
 
         formData.append(
@@ -1405,16 +1423,17 @@
           cloudinaryUploadPreset
         );
 
+        const resourceType =
+          isVideo ? "video" : "image";
 
         const uploadResponse =
           await fetch(
-            `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`,
+            `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/${resourceType}/upload`,
             {
               method: "POST",
               body: formData
             }
           );
-
 
         if (!uploadResponse.ok) {
 
@@ -1427,22 +1446,19 @@
           );
 
           throw new Error(
-            "Photo upload failed."
+            `${isVideo ? "Video" : "Photo"} upload failed.`
           );
 
         }
 
-
         const uploadResult =
           await uploadResponse.json();
 
-
-        const imageUrl =
+        const mediaUrl =
           uploadResult.secure_url;
 
-
         /*
-          Save photo message to Firestore.
+          Save the media message to Firestore.
         */
 
         await db.collection("messages").add({
@@ -1451,9 +1467,11 @@
 
           text: "",
 
-          imageUrl: imageUrl,
+          ...(isImage
+            ? { imageUrl: mediaUrl }
+            : { videoUrl: mediaUrl }),
 
-          type: "image",
+          type: isImage ? "image" : "video",
 
           sender: currentUser.uid,
 
@@ -1465,26 +1483,25 @@
             firebase.firestore.FieldValue.serverTimestamp(),
 
           readBy: {
-
             [currentUser.uid]: true
-
           }
 
         });
 
-
         /*
-          Tell the other device that
-          a photo was sent.
+          Tell the other device that media was sent.
         */
 
         sendNotification(
-          "📷 Sent you a photo"
+          isVideo
+            ? "🎥 Sent you a video"
+            : "📷 Sent you a photo"
         );
 
-
         uploadStatus.textContent =
-          "Photo sent!";
+          isVideo
+            ? "Video sent!"
+            : "Photo sent!";
 
         setTimeout(() => {
 
@@ -1496,12 +1513,14 @@
       } catch (error) {
 
         console.error(
-          "Photo upload error:",
+          "Media upload error:",
           error
         );
 
         alert(
-          "Photo could not be sent. Please try again."
+          isVideo
+            ? "Video could not be sent. Please try again."
+            : "Photo could not be sent. Please try again."
         );
 
         document
@@ -1510,14 +1529,12 @@
 
       }
 
-
       document
         .getElementById("photoButton")
         .classList.remove("uploading");
 
-
       /*
-        Reset file input so the same photo
+        Reset file input so the same photo/video
         can be selected again.
       */
 
@@ -1714,7 +1731,9 @@
       previewText.textContent =
         replyingTo.type === "image"
           ? "📷 Photo"
-          : replyingTo.text || "Message";
+          : replyingTo.type === "video"
+            ? "🎥 Video"
+            : replyingTo.text || "Message";
 
       preview.classList.add("show");
 
@@ -2033,7 +2052,9 @@
                     const replyPreviewText =
                       reply.type === "image"
                         ? "📷 Photo"
-                        : (reply.text || "Message");
+                        : reply.type === "video"
+                          ? "🎥 Video"
+                          : (reply.text || "Message");
 
                     replyHTML = `
                       <div class="reply-reference" data-jump-id="${escapeHTML(reply.id || "")}">
@@ -2082,6 +2103,48 @@
                         alt="Photo"
                         loading="lazy"
                       >
+
+                      ${replyButtonHTML}
+
+                      <div class="message-info">
+
+                        ${timeText}
+
+                        ${
+                          isMine
+                            ? " • " + readText
+                            : ""
+                        }
+
+                      </div>
+
+                    `;
+
+                  } else if (
+                    message.type === "video" &&
+                    message.videoUrl
+                  ) {
+
+                    div.innerHTML = `
+
+                      <div class="sender">
+                        ${escapeHTML(
+                          message.senderName ||
+                          "Unknown"
+                        )}
+                      </div>
+
+                      ${replyHTML}
+
+                      <video
+                        class="message-video"
+                        src="${escapeHTML(
+                          message.videoUrl
+                        )}"
+                        controls
+                        playsinline
+                        preload="metadata"
+                      ></video>
 
                       ${replyButtonHTML}
 
@@ -2356,4 +2419,4 @@
   </script>
 
 </body>
-</html>
+  </html>
